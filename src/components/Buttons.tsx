@@ -13,7 +13,7 @@ type IconButtonProps = ButtonCommon & {
 
 export function TextButton({ children, onClick }: TextButtonProps) {
   return (
-    <button onClick={onClick} className="Text-button">
+    <button onClick={onClick} className="Text-button bordered-dark-concave">
       {children}
     </button>
   );
@@ -21,7 +21,11 @@ export function TextButton({ children, onClick }: TextButtonProps) {
 
 export function IconButton({ icon, tooltip, onClick }: IconButtonProps) {
   return (
-    <button title={tooltip} onClick={onClick} className="Icon-button tr-fast">
+    <button
+      title={tooltip}
+      onClick={onClick}
+      className="Icon-button tr-fast bordered-dark-concave"
+    >
       <img src={icon} alt={tooltip} />
     </button>
   );

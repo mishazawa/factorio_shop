@@ -6,7 +6,7 @@ import CROP_TOOL_ICON from "../assets/icons/crop.svg";
 
 export function PropsMenu() {
   return (
-    <div className="Props-wrapper">
+    <div className="Props-wrapper bordered-dark-convex">
       <div className="Tools-wrapper">
         <IconButton icon={MOVE_TOOL_ICON} tooltip="translate" />
         <IconButton icon={RESIZE_TOOL_ICON} tooltip="resize" />

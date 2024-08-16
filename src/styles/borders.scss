@@ -1,0 +1,17 @@
+$bottom: #141314;
+$sides: #212021;
+$top: #7e7e7e;
+
+$border-size: 0.1rem;
+
+.bordered-dark-convex {
+  border: $border-size solid $sides;
+  border-top: $border-size solid $top;
+  border-bottom: $border-size solid $bottom;
+}
+
+.bordered-dark-concave {
+  border: $border-size solid $sides;
+  border-top: $border-size solid $bottom;
+  border-bottom: $border-size solid $top;
+}
