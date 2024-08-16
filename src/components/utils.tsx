@@ -1,5 +1,12 @@
 import p5 from "p5";
 import { RESPONSIVE_CANVAS } from "../constants";
+import { addImage } from "./store/images";
+
+type PImage = p5.Image & {
+  canvas: HTMLCanvasElement;
+  drawingContext: CanvasRenderingContext2D;
+  modified: boolean;
+};
 
 export function updateCanvasDimensions(p5: p5) {
   return {
@@ -20,4 +27,30 @@ export function onWindowResize(p5: p5) {
 
     p5.pixelDensity(window.devicePixelRatio);
   };
+}
+
+export function loadPImage(file: File) {
+  const reader = new FileReader();
+  const fileImage = new Image();
+  const processingImage = new p5.Image(1, 1) as PImage;
+
+  reader.addEventListener(
+    "load",
+    () => {
+      fileImage.src = reader.result as string;
+    },
+    false
+  );
+
+  fileImage.onload = () => {
+    processingImage.width = processingImage.canvas.width = fileImage.width;
+    processingImage.height = processingImage.canvas.height = fileImage.height;
+
+    processingImage.drawingContext.drawImage(fileImage, 0, 0);
+    processingImage.modified = true;
+
+    addImage(processingImage, file, fileImage);
+  };
+
+  reader.readAsDataURL(file);
 }

@@ -1,9 +1,10 @@
-import { TextButton } from "./Buttons";
+import { FileButton } from "./Buttons";
+import { loadPImage } from "./utils";
 
 export function TopMenu() {
   return (
     <div className="Header bordered-dark-convex">
-      <TextButton>import sprite</TextButton>
+      <FileButton onFile={loadPImage}>import sprite</FileButton>
     </div>
   );
 }

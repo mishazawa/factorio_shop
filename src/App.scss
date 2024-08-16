@@ -35,15 +35,20 @@
   overflow: hidden;
 }
 
-.util_flex-row {
-  display: flex;
-  width: 100%;
-  flex-direction: row;
-}
-.util_full-heigth {
-  height: 100%;
-}
+.util_ {
+  &flex-row {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+  }
+  &full-heigth {
+    height: 100%;
+  }
 
+  &hidden {
+    display: none;
+  }
+}
 .Text-button,
 .Icon-button {
   display: flex;
