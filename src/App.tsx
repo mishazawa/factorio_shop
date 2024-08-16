@@ -1,4 +1,4 @@
-import "./App.css";
+import "./App.scss";
 import { Canvas } from "./components/Canvas";
 import { PropsMenu } from "./components/PropsMenu";
 import { TopMenu } from "./components/TopMenu";

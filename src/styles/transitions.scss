@@ -1,0 +1,15 @@
+$speed-high: 0.1s;
+$speed-mid: 0.5s;
+$speed-low: 1s;
+
+.tr-fast {
+  transition: all $speed-high;
+}
+
+.tr-mid {
+  transition: all $speed-mid;
+}
+
+.tr-slow {
+  transition: all $speed-low;
+}

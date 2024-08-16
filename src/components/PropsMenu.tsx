@@ -1,3 +1,17 @@
+import { IconButton } from "./Buttons";
+
+import MOVE_TOOL_ICON from "../assets/icons/translate.svg";
+import RESIZE_TOOL_ICON from "../assets/icons/resize.svg";
+import CROP_TOOL_ICON from "../assets/icons/crop.svg";
+
 export function PropsMenu() {
-  return <div className="Props-wrapper">stuff</div>;
+  return (
+    <div className="Props-wrapper">
+      <div className="Tools-wrapper">
+        <IconButton icon={MOVE_TOOL_ICON} tooltip="translate" />
+        <IconButton icon={RESIZE_TOOL_ICON} tooltip="resize" />
+        <IconButton icon={CROP_TOOL_ICON} tooltip="crop" />
+      </div>
+    </div>
+  );
 }

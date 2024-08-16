@@ -1,7 +1,9 @@
+import { TextButton } from "./Buttons";
+
 export function TopMenu() {
   return (
-    <div>
-      <p>import sprite</p>
+    <div className="Header">
+      <TextButton>import sprite</TextButton>
     </div>
   );
 }
