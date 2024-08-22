@@ -4,7 +4,7 @@ import MOVE_TOOL_ICON from "../assets/icons/translate.svg";
 import RESIZE_TOOL_ICON from "../assets/icons/resize.svg";
 import CROP_TOOL_ICON from "../assets/icons/crop.svg";
 
-export function PropsMenu() {
+export function Tools() {
   return (
     <div className="Props-wrapper bordered-dark-convex">
       <div className="Tools-wrapper">

@@ -1,6 +1,6 @@
 import "./App.scss";
 import { Canvas } from "./components/Canvas";
-import { PropsMenu } from "./components/PropsMenu";
+import { Tools } from "./components/Tools";
 import { TopMenu } from "./components/TopMenu";
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
     <div className="Workspace-wrapper">
       <TopMenu />
       <div className="util_flex-row util_full-heigth">
-        <PropsMenu />
+        <Tools />
         <Canvas />
       </div>
     </div>

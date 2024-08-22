@@ -18,6 +18,7 @@ type ImagesStore = {
   count: number;
   images: Sprite[];
   sprites: SpriteObject[];
+  selected: number;
 };
 
 // type ImagesStoreUi = {};
@@ -26,6 +27,7 @@ export const realtimeStore = createReactlessStore<ImagesStore>({
   images: [],
   sprites: [],
   count: 0,
+  selected: 0,
 });
 
 // export const reactiveStore = create();
