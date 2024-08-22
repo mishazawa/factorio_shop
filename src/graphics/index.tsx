@@ -16,8 +16,9 @@ export function setup(p: p5) {
   };
 }
 
+const NO_LAYER = -1;
 const frameState = {
-  lastSelectedLayer: -1,
+  lastSelectedLayer: NO_LAYER,
 };
 
 export function draw(p: p5) {
@@ -35,32 +36,45 @@ export function draw(p: p5) {
       );
     }
 
-    // perform operations on each sprite
-    for (let i = 0; i < store.count; i++) {
-      // only one sprite can be hovered at the same time
-      // if aabb check passed -> then end of loop
-      // todo: layer ordering to fix focus fighting
-      if (
-        hover(
-          store.sprites[i].xform.position.x,
-          store.sprites[i].xform.position.y,
-          store.sprites[i].width,
-          store.sprites[i].height
-        )
-      ) {
-        outline(
-          store.sprites[i].xform.position.x,
-          store.sprites[i].xform.position.y,
-          store.sprites[i].width,
-          store.sprites[i].height
-        );
-        frameState.lastSelectedLayer = i;
-        break;
+    // if there is no already selected layer ->
+    // then perform ops
+    // else ->
+    // outline `lastSelectedLayer`
+    if (frameState.lastSelectedLayer === NO_LAYER) {
+      // perform operations on each sprite
+      for (let i = 0; i < store.count; i++) {
+        // only one sprite can be hovered at the same time
+        // if aabb check passed -> then end of loop
+        // todo: layer ordering
+        if (
+          hover(
+            store.sprites[i].xform.position.x,
+            store.sprites[i].xform.position.y,
+            store.sprites[i].width,
+            store.sprites[i].height
+          )
+        ) {
+          outline(
+            store.sprites[i].xform.position.x,
+            store.sprites[i].xform.position.y,
+            store.sprites[i].width,
+            store.sprites[i].height
+          );
+          frameState.lastSelectedLayer = i;
+          break;
+        }
       }
+    } else {
+      outline(
+        store.sprites[frameState.lastSelectedLayer].xform.position.x,
+        store.sprites[frameState.lastSelectedLayer].xform.position.y,
+        store.sprites[frameState.lastSelectedLayer].width,
+        store.sprites[frameState.lastSelectedLayer].height
+      );
     }
 
     // if mouse button pressed -> then move sprite freely with mouse
-    if (isLeftMouseInteraction() && frameState.lastSelectedLayer !== -1) {
+    if (isLeftMouseInteraction() && frameState.lastSelectedLayer !== NO_LAYER) {
       transformImage(
         frameState.lastSelectedLayer,
         translate(store.sprites[frameState.lastSelectedLayer].xform)
@@ -69,12 +83,15 @@ export function draw(p: p5) {
 
     // if mouse button released, but layer not updated -> then snap to grid
     // and clean frame state
-    if (!isLeftMouseInteraction() && frameState.lastSelectedLayer !== -1) {
+    if (
+      !isLeftMouseInteraction() &&
+      frameState.lastSelectedLayer !== NO_LAYER
+    ) {
       transformImage(
         frameState.lastSelectedLayer,
         snapToGrid(store.sprites[frameState.lastSelectedLayer].xform)
       );
-      frameState.lastSelectedLayer = -1;
+      frameState.lastSelectedLayer = NO_LAYER;
     }
 
     grid();
