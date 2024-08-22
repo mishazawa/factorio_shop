@@ -15,11 +15,8 @@ export function init(p: p5) {
   initRaycast(_PROC);
 }
 
-export function hoverOutline(x: number, y: number, w: number, h: number) {
-  const a = x + w;
-  const b = y + h;
-  if (castAABB(x, y, a, b)) {
-    outline(x, y, a, b);
+export function hover(x: number, y: number, w: number, h: number) {
+  if (castAABB(x, y, x + w, y + h)) {
     return true;
   }
   return false;
