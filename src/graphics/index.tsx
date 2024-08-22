@@ -5,7 +5,7 @@ import {
   transformImage,
 } from "../components/store/images";
 import { grid, init, hover, outline } from "./utils";
-import { isLeftMouseInteraction, translate } from "./raycast";
+import { isLeftMouseInteraction, snapToGrid, translate } from "./raycast";
 
 export function setup(p: p5) {
   return () => {
@@ -15,6 +15,10 @@ export function setup(p: p5) {
     init(p); // important call.
   };
 }
+
+const frameState = {
+  lastSelectedLayer: -1,
+};
 
 export function draw(p: p5) {
   return () => {
@@ -31,31 +35,46 @@ export function draw(p: p5) {
       );
     }
 
-    if (isLeftMouseInteraction()) {
-      // perform operations on each sprite
-      for (let i = 0; i < store.count; i++) {
-        // only one sprite can be hovered at the same time
-        // if aabb check passed -> then end of loop
-        // todo: layer ordering to fix focus fighting
-        if (
-          hover(
-            store.sprites[i].xform.position.x,
-            store.sprites[i].xform.position.y,
-            store.sprites[i].width,
-            store.sprites[i].height
-          )
-        ) {
-          outline(
-            store.sprites[i].xform.position.x,
-            store.sprites[i].xform.position.y,
-            store.sprites[i].width,
-            store.sprites[i].height
-          );
-
-          transformImage(i, translate(store.sprites[i].xform));
-          break;
-        }
+    // perform operations on each sprite
+    for (let i = 0; i < store.count; i++) {
+      // only one sprite can be hovered at the same time
+      // if aabb check passed -> then end of loop
+      // todo: layer ordering to fix focus fighting
+      if (
+        hover(
+          store.sprites[i].xform.position.x,
+          store.sprites[i].xform.position.y,
+          store.sprites[i].width,
+          store.sprites[i].height
+        )
+      ) {
+        outline(
+          store.sprites[i].xform.position.x,
+          store.sprites[i].xform.position.y,
+          store.sprites[i].width,
+          store.sprites[i].height
+        );
+        frameState.lastSelectedLayer = i;
+        break;
       }
+    }
+
+    // if mouse button pressed -> then move sprite freely with mouse
+    if (isLeftMouseInteraction() && frameState.lastSelectedLayer !== -1) {
+      transformImage(
+        frameState.lastSelectedLayer,
+        translate(store.sprites[frameState.lastSelectedLayer].xform)
+      );
+    }
+
+    // if mouse button released, but layer not updated -> then snap to grid
+    // and clean frame state
+    if (!isLeftMouseInteraction() && frameState.lastSelectedLayer !== -1) {
+      transformImage(
+        frameState.lastSelectedLayer,
+        snapToGrid(store.sprites[frameState.lastSelectedLayer].xform)
+      );
+      frameState.lastSelectedLayer = -1;
     }
 
     grid();
