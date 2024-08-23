@@ -1,48 +1,25 @@
-import p5 from "p5";
-// import { create } from "zustand";
-import { createReactlessStore } from ".";
+import { createReactlessStore } from "..";
+import { clamp } from "../../utils";
 
-export type Xform = {
-  position: { x: number; y: number };
-  scale: { x: number; y: number };
-};
-
-type Sprite = p5.Image;
-type SpriteObject = {
-  locked: boolean;
-  filename: string;
-  width: number;
-  height: number;
-  xform: Xform;
-};
-
-type ImagesStore = {
-  count: number;
-  images: Sprite[];
-  sprites: SpriteObject[];
-};
-
-// type ImagesStoreUi = {};
+import { ImagesStore, Sprite, SpriteObject, Xform } from "./types";
 
 export const realtimeStore = createReactlessStore<ImagesStore>({
   images: [],
   sprites: [],
-  count: 0,
 });
 
-// export const reactiveStore = create();
-
-export const addImage = (
+export function addImage(
   value: Sprite,
   metadata: File,
   dom: HTMLImageElement
-) => {
-  realtimeStore.update((draft) => {
+): [number] {
+  const { sprites } = realtimeStore.update((draft) => {
     draft.images.push(value);
     draft.sprites.push(createBlankSprite(metadata, dom));
-    draft.count++;
   });
-};
+  // prevent to return values < 0
+  return [clamp(sprites.length - 1)];
+}
 
 export function transformImage(i: number, xform: Xform) {
   realtimeStore.update((draft) => {
@@ -50,7 +27,12 @@ export function transformImage(i: number, xform: Xform) {
   });
 }
 
-export const removeImage = (index: number) => {};
+export const removeImage = (index: number) => {
+  realtimeStore.update((draft) => {
+    draft.images.splice(index, 1);
+    draft.sprites.splice(index, 1);
+  });
+};
 
 function createBlankSprite(
   metadata: File,

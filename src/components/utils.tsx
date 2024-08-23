@@ -1,6 +1,7 @@
 import p5 from "p5";
 import { RESPONSIVE_CANVAS } from "../constants";
-import { addImage } from "./store/images";
+import { addImage, removeImage } from "./store/layers/realtime";
+import { useLayersStore } from "./store/layers/reactive";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;
@@ -49,8 +50,20 @@ export function loadPImage(file: File) {
     processingImage.drawingContext.drawImage(fileImage, 0, 0);
     processingImage.modified = true;
 
-    addImage(processingImage, file, fileImage);
+    // add data to realtime storage and track layers in UI storage
+    useLayersStore
+      .getState()
+      .add(...addImage(processingImage, file, fileImage));
   };
 
   reader.readAsDataURL(file);
+}
+
+export function unloadPImage(layerIndex: number) {
+  removeImage(layerIndex);
+  useLayersStore.getState().remove(layerIndex);
+}
+
+export function clamp(v: number, min = 0, max = Infinity) {
+  return v < min ? min : v > max ? max : v;
 }

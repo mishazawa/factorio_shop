@@ -3,7 +3,8 @@ import { onWindowResize } from "../components/utils";
 import {
   realtimeStore as rts,
   transformImage,
-} from "../components/store/images";
+} from "../components/store/layers/realtime";
+import { useLayersStore } from "../components/store/layers/reactive";
 import { grid, init, hover, outline } from "./utils";
 import { isLeftMouseInteraction, snapToGrid, translate } from "./raycast";
 
@@ -24,15 +25,22 @@ const frameState = {
 export function draw(p: p5) {
   return () => {
     const store = rts.read();
+    const layers = useLayersStore.getState().layers;
+
+    const sprites = store.sprites;
+    const images = store.images;
     // clear screen
     p.background(250);
 
-    // draw layers
-    for (let i = 0; i < store.count; i++) {
+    // draw layers in reverse order
+    // lower indices on top of higher indices
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const lay = layers[i];
+
       p.image(
-        store.images[i],
-        store.sprites[i].xform.position.x,
-        store.sprites[i].xform.position.y
+        images[lay],
+        sprites[lay].xform.position.x,
+        sprites[lay].xform.position.y
       );
     }
 
@@ -42,34 +50,38 @@ export function draw(p: p5) {
     // outline `lastSelectedLayer`
     if (frameState.lastSelectedLayer === NO_LAYER) {
       // perform operations on each sprite
-      for (let i = 0; i < store.count; i++) {
+      // cast rays from top to bottom
+      for (let i = 0; i < layers.length; i++) {
+        const lay = layers[i];
+
         // only one sprite can be hovered at the same time
         // if aabb check passed -> then end of loop
         // todo: layer ordering
         if (
           hover(
-            store.sprites[i].xform.position.x,
-            store.sprites[i].xform.position.y,
-            store.sprites[i].width,
-            store.sprites[i].height
+            sprites[lay].xform.position.x,
+            sprites[lay].xform.position.y,
+            sprites[lay].width,
+            sprites[lay].height
           )
         ) {
           outline(
-            store.sprites[i].xform.position.x,
-            store.sprites[i].xform.position.y,
-            store.sprites[i].width,
-            store.sprites[i].height
+            sprites[lay].xform.position.x,
+            sprites[lay].xform.position.y,
+            sprites[lay].width,
+            sprites[lay].height
           );
-          frameState.lastSelectedLayer = i;
+
+          frameState.lastSelectedLayer = lay;
           break;
         }
       }
     } else {
       outline(
-        store.sprites[frameState.lastSelectedLayer].xform.position.x,
-        store.sprites[frameState.lastSelectedLayer].xform.position.y,
-        store.sprites[frameState.lastSelectedLayer].width,
-        store.sprites[frameState.lastSelectedLayer].height
+        sprites[frameState.lastSelectedLayer].xform.position.x,
+        sprites[frameState.lastSelectedLayer].xform.position.y,
+        sprites[frameState.lastSelectedLayer].width,
+        sprites[frameState.lastSelectedLayer].height
       );
     }
 
@@ -77,7 +89,7 @@ export function draw(p: p5) {
     if (isLeftMouseInteraction() && frameState.lastSelectedLayer !== NO_LAYER) {
       transformImage(
         frameState.lastSelectedLayer,
-        translate(store.sprites[frameState.lastSelectedLayer].xform)
+        translate(sprites[frameState.lastSelectedLayer].xform)
       );
     }
 
@@ -89,8 +101,9 @@ export function draw(p: p5) {
     ) {
       transformImage(
         frameState.lastSelectedLayer,
-        snapToGrid(store.sprites[frameState.lastSelectedLayer].xform)
+        snapToGrid(sprites[frameState.lastSelectedLayer].xform)
       );
+
       frameState.lastSelectedLayer = NO_LAYER;
     }
 

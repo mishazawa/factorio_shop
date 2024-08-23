@@ -11,6 +11,7 @@ type TextButtonProps = ButtonCommon & {
 type IconButtonProps = ButtonCommon & {
   icon: string;
   tooltip?: string;
+  className?: string;
 };
 
 type FileButtonProps = TextButtonProps & {
@@ -57,12 +58,17 @@ export function TextButton({ children, onClick }: TextButtonProps) {
   );
 }
 
-export function IconButton({ icon, tooltip, onClick }: IconButtonProps) {
+export function IconButton({
+  icon,
+  tooltip,
+  onClick,
+  className,
+}: IconButtonProps) {
   return (
     <button
       title={tooltip}
       onClick={onClick}
-      className="Icon-button tr-fast bordered-dark-concave"
+      className={`${className} Icon-button tr-fast bordered-dark-concave`}
     >
       <img src={icon} alt={tooltip} />
     </button>

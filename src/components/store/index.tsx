@@ -2,7 +2,7 @@ import { produce, WritableDraft } from "immer";
 
 type ReactlessStore<T> = {
   data: T;
-  update: (callback: (args: WritableDraft<T>) => void) => void;
+  update: (callback: (args: WritableDraft<T>) => void) => T;
   read: () => T;
 };
 
@@ -11,6 +11,7 @@ export function createReactlessStore<T>(initialState: T): ReactlessStore<T> {
     data: { ...initialState },
     update(callback) {
       this.data = produce(this.data, callback);
+      return this.data;
     },
     read() {
       return this.data;

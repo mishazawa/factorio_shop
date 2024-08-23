@@ -1,6 +1,7 @@
 import p5 from "p5";
-import { Xform } from "../components/store/images";
+
 import { TILE_DIMENSIONS } from "../constants";
+import { Xform } from "../components/store/layers/types";
 
 let _PROC: p5 = null!;
 
