@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import { create } from "zustand";
-import { LayersReactiveStoreData, LayersReactiveStoreFunc } from "./types";
+import { LayersReactiveStoreData, LayersReactiveStoreFunc } from "../types";
 
 export const useLayersStore = create<
   LayersReactiveStoreData & LayersReactiveStoreFunc

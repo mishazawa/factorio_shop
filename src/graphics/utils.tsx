@@ -6,13 +6,13 @@ import {
   OUTLINE_WIDTH,
   TILE_DIMENSIONS,
 } from "../constants";
-import { castAABB, initRaycast } from "./raycast";
+import { castAABB } from "./raycast";
+import { Xform } from "../components/store/types";
 
 let _PROC: p5 = null!;
 
-export function init(p: p5) {
+export function initUtils(p: p5) {
   _PROC = p;
-  initRaycast(_PROC);
 }
 
 export function hover(x: number, y: number, w: number, h: number) {
@@ -58,4 +58,28 @@ export function grid(dim: number = TILE_DIMENSIONS) {
   }
 
   _PROC.pop();
+}
+
+export function image(img: p5.Image, x: number, y: number) {
+  _PROC.image(img, x, y);
+}
+
+export function snapToGrid(xform: Xform) {
+  return {
+    ...xform,
+    position: {
+      x: Math.round(xform.position.x / TILE_DIMENSIONS) * TILE_DIMENSIONS,
+      y: Math.round(xform.position.y / TILE_DIMENSIONS) * TILE_DIMENSIONS,
+    },
+  };
+}
+
+export function translate(xform: Xform) {
+  return {
+    ...xform,
+    position: {
+      x: _PROC.mouseX + (xform.position.x - _PROC.pmouseX),
+      y: _PROC.mouseY + (xform.position.y - _PROC.pmouseY),
+    },
+  };
 }

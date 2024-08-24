@@ -1,10 +1,5 @@
-import { produce, WritableDraft } from "immer";
-
-type ReactlessStore<T> = {
-  data: T;
-  update: (callback: (args: WritableDraft<T>) => void) => T;
-  read: () => T;
-};
+import { produce } from "immer";
+import { ReactlessStore } from "./types";
 
 export function createReactlessStore<T>(initialState: T): ReactlessStore<T> {
   return {

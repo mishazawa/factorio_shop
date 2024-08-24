@@ -1,7 +1,7 @@
 import { createReactlessStore } from "..";
 import { clamp } from "../../utils";
 
-import { ImagesStore, Sprite, SpriteObject, Xform } from "./types";
+import { ImagesStore, Sprite, SpriteObject, Xform } from "../types";
 
 export const realtimeStore = createReactlessStore<ImagesStore>({
   images: [],
