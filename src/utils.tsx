@@ -1,7 +1,7 @@
 import p5 from "p5";
-import { RESPONSIVE_CANVAS } from "../constants";
-import { addImage, removeImage } from "./store/layers/realtime";
-import { useLayersStore } from "./store/layers/reactive";
+import { RESPONSIVE_CANVAS } from "./constants";
+import { addImage, removeImage } from "./store/layers";
+import { useLayersStore } from "./store/layers";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;

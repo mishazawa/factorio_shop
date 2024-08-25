@@ -1,16 +1,23 @@
-import { createReactlessStore } from "..";
-import {
-  COLLISION_WIDTH,
-  COLLISION_WIDTH_HALF,
-  DEBUG,
-} from "../../../constants";
-import { SelectBox, SelectionStore, Vec4 } from "../types";
+import { createReactlessStore } from ".";
+import { COLLISION_WIDTH, COLLISION_WIDTH_HALF, DEBUG } from "../constants";
+import { SelectBox, SelectionStore, SpriteObject, Vec4 } from "./types";
 
 export const realtimeStore = createReactlessStore<SelectionStore>({
   box: cleanSelection(),
   collisions: calculateCollisionsLUT(cleanSelection()),
   DEBUG_collisions: [],
 });
+
+export function updateSelectionBox(sprite: SpriteObject): SelectionStore {
+  return realtimeStore.update((draft) => {
+    draft.box = cleanSelection(
+      sprite.xform.position.x,
+      sprite.xform.position.y,
+      sprite.width,
+      sprite.height
+    );
+  });
+}
 
 export function reset() {
   realtimeStore.update((draft) => {
@@ -32,15 +39,20 @@ export function refreshSelection() {
   });
 }
 
-function cleanSelection(): SelectBox {
+function cleanSelection(
+  x: number = 0,
+  y: number = 0,
+  left: number = 100,
+  top: number = 100
+): SelectBox {
   return {
     position: {
-      x: 200,
-      y: 200,
+      x,
+      y,
     },
     offset: {
-      left: 100,
-      top: 100,
+      left,
+      top,
     },
   };
 }

@@ -7,7 +7,7 @@ import {
   TILE_DIMENSIONS,
 } from "../constants";
 import { castAABB } from "./raycast";
-import { Xform } from "../components/store/types";
+import { Xform } from "../store/types";
 
 let _PROC: p5 = null!;
 

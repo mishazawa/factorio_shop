@@ -62,7 +62,26 @@ export type ReactlessStore<T> = {
 export type Vec4 = [number, number, number, number];
 
 export type FrameState = {
+  hover: number;
+  active: number;
+  selection: {
+    drag: boolean;
+    translate: boolean;
+    locked: boolean;
+    handle: null | SelectBoxManipulator;
+  };
   lastSelectedLayer: number;
+  lastHoveredLayer: number;
   isDrag: boolean;
   selectionManipulator: null | SelectBoxManipulator;
 };
+
+export type ToolsStore = {
+  mode: ToolMode;
+};
+
+export type ToolsStoreFunc = {
+  setMode: (m: ToolMode) => void;
+};
+
+export type ToolMode = "TRANSFORM" | "CROP" | "NONE";

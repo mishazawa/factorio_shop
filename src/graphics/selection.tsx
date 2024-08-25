@@ -1,18 +1,16 @@
 import p5 from "p5";
-import { outline } from "./utils";
-import {
-  SelectBox,
-  SelectBoxManipulator,
-  Vec4,
-} from "../components/store/types";
-import { castAABB, isLeftMouseInteraction } from "./raycast";
+import { outline, snapToGrid, translate } from "./utils";
+import { SelectBox, SelectBoxManipulator, Vec4 } from "../store/types";
+import { castAABB } from "./raycast";
 import {
   refreshSelection,
   reset,
   realtimeStore as rts,
-} from "../components/store/selection/realime";
-import { DEBUG, MANIPULATOR_ORDER } from "../constants";
-import { realtimeStore as frameStateStore } from "../components/store/frame/realtime";
+  updateSelectionBox,
+} from "../store/selection";
+import { DEBUG, MANIPULATOR_ORDER, NO_ACTIVE_LAYER } from "../constants";
+import { realtimeStore as frameStateStore } from "../store/frame";
+import { realtimeStore as layersStore } from "../store/layers";
 
 let _PROC: p5 = null!;
 
@@ -24,7 +22,8 @@ export function initSelection(p: p5) {
   reset();
 }
 
-function draw() {
+export function drawSelection() {
+  if (frameStateStore.read().active === NO_ACTIVE_LAYER) return;
   const { box } = rts.read();
   outline(
     box.position.x,
@@ -36,37 +35,54 @@ function draw() {
   );
 }
 
-export function selection() {
-  draw();
+export function onSelectionClick() {
+  const { active, selection } = frameStateStore.read();
+  if (active === NO_ACTIVE_LAYER) return;
 
-  const { isDrag, selectionManipulator } = frameStateStore.read();
-  if (isLeftMouseInteraction() && isDrag) {
-    if (selectionManipulator) {
-      DEBUG_selection(selectionManipulator);
-      extendSelection(selectionManipulator);
-    } else {
-      frameStateStore.update((fs) => {
-        fs.isDrag = false;
-      });
-    }
+  if (selection.translate) {
+    translateLayer(active);
   }
 
-  if (isLeftMouseInteraction() && !isDrag) {
+  if (!selection.drag) {
     frameStateStore.update((fs) => {
-      fs.selectionManipulator = getManipulatorIntersection(
-        rts.read().collisions
-      );
-      fs.isDrag = !!fs.selectionManipulator;
+      fs.selection.handle = getManipulatorIntersection(rts.read().collisions);
+      fs.selection.drag = !!fs.selection.handle;
+      fs.selection.translate = !fs.selection.handle;
     });
   }
 
-  if (!isLeftMouseInteraction() && isDrag) {
+  if (selection.drag && selection.handle) {
+    DEBUG_selection(selection.handle);
+    extendSelection(selection.handle);
+    // resize sprite
+  }
+}
+
+function translateLayer(layer: number, snap: boolean = false) {
+  layersStore.update((draft) => {
+    draft.sprites[layer].xform = (!snap ? translate : snapToGrid)(
+      layersStore.read().sprites[layer].xform
+    );
+  });
+}
+
+export function onSelectionRelease() {
+  const { selection, active } = frameStateStore.read();
+
+  if (selection.drag) {
     refreshSelection();
-
     frameStateStore.update((fs) => {
-      fs.isDrag = false;
-      fs.selectionManipulator = null;
+      fs.selection.drag = false;
+      fs.selection.handle = null;
     });
+  }
+
+  if (active === NO_ACTIVE_LAYER) return;
+
+  if (selection.translate) {
+    translateLayer(active, true);
+    updateSelectionBox(layersStore.read().sprites[active]);
+    refreshSelection();
   }
 }
 

@@ -108,6 +108,9 @@
   &:hover {
     background-color: $button1;
   }
+  &.activeTool {
+    background-color: $button5;
+  }
 }
 .Danger-button {
   &:hover {

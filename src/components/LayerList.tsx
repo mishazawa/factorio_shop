@@ -3,9 +3,9 @@ import { Reorder, useDragControls, useMotionValue } from "framer-motion";
 import GRIP_ICON from "../assets/icons/grip.svg";
 import TRASH_ICON from "../assets/icons/trash-can.svg";
 import { IconButton } from "./Buttons";
-import { useLayersStore } from "./store/layers/reactive";
-import { realtimeStore as rts } from "./store/layers/realtime";
-import { unloadPImage } from "./utils";
+import { useLayersStore } from "../store/layers";
+import { realtimeStore as rts } from "../store/layers";
+import { unloadPImage } from "../utils";
 
 export function LayerList() {
   const layers = useLayersStore((s) => s.layers);

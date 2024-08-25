@@ -15,6 +15,6 @@ export function castAABB(x: number, y: number, w: number, h: number) {
   );
 }
 
-export function isLeftMouseInteraction() {
-  return _PROC.mouseIsPressed && _PROC.mouseButton === _PROC.LEFT;
+export function isMouseInteraction(btn: p5.LEFT | p5.RIGHT) {
+  return _PROC.mouseIsPressed && _PROC.mouseButton === btn;
 }
