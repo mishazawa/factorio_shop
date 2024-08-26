@@ -1,9 +1,9 @@
 import { IconButton } from "./Buttons";
 
-import MOVE_TOOL_ICON from "../assets/icons/translate.svg";
-import CROP_TOOL_ICON from "../assets/icons/crop.svg";
+import { setMode, useToolsStore } from "@store/tools";
+import MOVE_TOOL_ICON from "@assets/icons/translate.svg";
+import CROP_TOOL_ICON from "@assets/icons/crop.svg";
 import { LayerList } from "./LayerList";
-import { setMode, useToolsStore } from "../store/tools";
 
 export function Tools() {
   const activeMode = useToolsStore((s) => s.mode);

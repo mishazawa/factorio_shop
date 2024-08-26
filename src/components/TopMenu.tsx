@@ -1,5 +1,5 @@
+import { loadPImage } from "@app/utils";
 import { FileButton } from "./Buttons";
-import { loadPImage } from "../utils";
 
 export function TopMenu() {
   return (

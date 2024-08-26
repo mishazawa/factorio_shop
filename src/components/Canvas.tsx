@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { ReactP5Wrapper } from "@p5-wrapper/react";
-import { onWindowResize } from "../utils";
-import { draw, setup } from "../graphics";
+import { draw, setup } from "@app/graphics";
+import { onWindowResize } from "@app/utils";
 
 function sketch(p5: p5) {
   p5.setup = setup(p5);

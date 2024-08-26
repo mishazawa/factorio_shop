@@ -1,6 +1,7 @@
 export const DEBUG = !!process.env.REACT_APP_DEBUG;
 export const RESPONSIVE_CANVAS = true;
 export const TILE_DIMENSIONS = 32;
+export const BACKGROUND_COLOR = 250;
 export const GRID_COLOR: [number, number, number] = [188, 188, 188];
 export const GRID_WIDTH = 1;
 export const OUTLINE_WIDTH = 2;

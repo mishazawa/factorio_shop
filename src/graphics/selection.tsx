@@ -1,16 +1,19 @@
 import p5 from "p5";
-import { outline, snapToGrid, translate } from "./utils";
-import { SelectBox, SelectBoxManipulator, Vec4 } from "../store/types";
+import { outline, resize, snapToGrid, translate } from "./utils";
+
 import { castAABB } from "./raycast";
+import { NO_ACTIVE_LAYER, DEBUG, MANIPULATOR_ORDER } from "@app/constants";
+import { Vec4 } from "@app/store/common";
+import { frameState } from "@app/store/frame";
+import { layersState } from "@app/store/layers";
 import {
-  refreshSelection,
   reset,
-  realtimeStore as rts,
+  selectionState,
+  SelectBox,
+  refreshSelection,
   updateSelectionBox,
-} from "../store/selection";
-import { DEBUG, MANIPULATOR_ORDER, NO_ACTIVE_LAYER } from "../constants";
-import { realtimeStore as frameStateStore } from "../store/frame";
-import { realtimeStore as layersStore } from "../store/layers";
+  SelectBoxHandle,
+} from "@app/store/selection";
 
 let _PROC: p5 = null!;
 
@@ -23,55 +26,69 @@ export function initSelection(p: p5) {
 }
 
 export function drawSelection() {
-  if (frameStateStore.read().active === NO_ACTIVE_LAYER) return;
-  const { box } = rts.read();
+  if (frameState.read().active === NO_ACTIVE_LAYER) return;
+  const { box } = selectionState.read();
   outline(
     box.position.x,
     box.position.y,
-    box.offset.left,
-    box.offset.top,
+    box.size.x,
+    box.size.y,
     3,
     [255, 0, 0]
   );
 }
 
 export function onSelectionClick() {
-  const { active, selection } = frameStateStore.read();
+  const { active, selection } = frameState.read();
+  if (active === NO_ACTIVE_LAYER) return;
+
+  if (!selection.drag) {
+    frameState.update((fs) => {
+      fs.selection.handle = getManipulatorIntersection(
+        selectionState.read().collisions
+      );
+      fs.selection.drag = !!fs.selection.handle;
+      fs.selection.translate = !fs.selection.handle;
+    });
+  }
+}
+
+export function onSelectionPress() {
+  const { active, selection } = frameState.read();
   if (active === NO_ACTIVE_LAYER) return;
 
   if (selection.translate) {
     translateLayer(active);
   }
 
-  if (!selection.drag) {
-    frameStateStore.update((fs) => {
-      fs.selection.handle = getManipulatorIntersection(rts.read().collisions);
-      fs.selection.drag = !!fs.selection.handle;
-      fs.selection.translate = !fs.selection.handle;
-    });
-  }
-
   if (selection.drag && selection.handle) {
     DEBUG_selection(selection.handle);
     extendSelection(selection.handle);
     // resize sprite
+    resizeLayer(active, selectionState.read().box);
   }
 }
 
 function translateLayer(layer: number, snap: boolean = false) {
-  layersStore.update((draft) => {
+  layersState.update((draft) => {
     draft.sprites[layer].xform = (!snap ? translate : snapToGrid)(
-      layersStore.read().sprites[layer].xform
+      draft.sprites[layer].xform
     );
   });
 }
 
+function resizeLayer(layer: number, selection: SelectBox) {
+  layersState.update((draft) => {
+    draft.sprites[layer].xform = resize(selection);
+  });
+}
+
 export function onSelectionRelease() {
-  const { selection, active } = frameStateStore.read();
+  const { selection, active } = frameState.read();
 
   if (selection.drag) {
     refreshSelection();
-    frameStateStore.update((fs) => {
+    frameState.update((fs) => {
       fs.selection.drag = false;
       fs.selection.handle = null;
     });
@@ -81,13 +98,13 @@ export function onSelectionRelease() {
 
   if (selection.translate) {
     translateLayer(active, true);
-    updateSelectionBox(layersStore.read().sprites[active]);
+    updateSelectionBox(layersState.read().sprites[active]);
     refreshSelection();
   }
 }
 
-function extendSelection(manipulator: SelectBoxManipulator) {
-  rts.update(({ box }) => {
+function extendSelection(manipulator: SelectBoxHandle) {
+  selectionState.update(({ box }) => {
     switch (manipulator) {
       case "T":
         resizeTop(box);
@@ -121,7 +138,7 @@ function extendSelection(manipulator: SelectBoxManipulator) {
   });
 }
 
-function DEBUG_selection(manipulator: SelectBoxManipulator) {
+function DEBUG_selection(manipulator: SelectBoxHandle) {
   if (!DEBUG) return;
   const [
     tl_box,
@@ -132,7 +149,7 @@ function DEBUG_selection(manipulator: SelectBoxManipulator) {
     tl_bl_box,
     tr_br_box,
     br_bl_box,
-  ] = rts.read().DEBUG_collisions;
+  ] = selectionState.read().DEBUG_collisions;
 
   switch (manipulator) {
     case "T":
@@ -164,29 +181,29 @@ function DEBUG_selection(manipulator: SelectBoxManipulator) {
 
 function getManipulatorIntersection(
   collisions: Vec4[]
-): SelectBoxManipulator | null {
+): SelectBoxHandle | null {
   for (let i = 0; i < collisions.length; i++) {
     if (castAABB(...collisions[i]))
-      return MANIPULATOR_ORDER[i] as SelectBoxManipulator;
+      return MANIPULATOR_ORDER[i] as SelectBoxHandle;
   }
 
   return null;
 }
 
 function resizeTop(box: SelectBox) {
-  box.offset.top = box.offset.top + box.position.y - _PROC.mouseY;
+  box.size.y = box.size.y + box.position.y - _PROC.mouseY;
   box.position.y = box.position.y - (box.position.y - _PROC.mouseY);
 }
 
 function resizeLeft(box: SelectBox) {
-  box.offset.left = box.offset.left + box.position.x - _PROC.mouseX;
+  box.size.x = box.size.x + box.position.x - _PROC.mouseX;
   box.position.x = box.position.x - (box.position.x - _PROC.mouseX);
 }
 
 function resizeRight(box: SelectBox) {
-  box.offset.left = _PROC.mouseX - box.position.x;
+  box.size.x = _PROC.mouseX - box.position.x;
 }
 
 function resizeBottom(box: SelectBox) {
-  box.offset.top = _PROC.mouseY - box.position.y;
+  box.size.y = _PROC.mouseY - box.position.y;
 }

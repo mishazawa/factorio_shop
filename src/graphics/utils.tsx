@@ -1,13 +1,14 @@
 import p5 from "p5";
+
+import { castAABB } from "./raycast";
+import { Xform } from "@store/common";
 import {
   GRID_COLOR,
   GRID_WIDTH,
   OUTLINE_COLOR,
   OUTLINE_WIDTH,
   TILE_DIMENSIONS,
-} from "../constants";
-import { castAABB } from "./raycast";
-import { Xform } from "../store/types";
+} from "@app/constants";
 
 let _PROC: p5 = null!;
 
@@ -60,8 +61,8 @@ export function grid(dim: number = TILE_DIMENSIONS) {
   _PROC.pop();
 }
 
-export function image(img: p5.Image, x: number, y: number) {
-  _PROC.image(img, x, y);
+export function image(img: p5.Image, x: number, y: number, ...args: number[]) {
+  _PROC.image(img, x, y, ...args);
 }
 
 export function snapToGrid(xform: Xform) {
@@ -80,6 +81,19 @@ export function translate(xform: Xform) {
     position: {
       x: _PROC.mouseX + (xform.position.x - _PROC.pmouseX),
       y: _PROC.mouseY + (xform.position.y - _PROC.pmouseY),
+    },
+  };
+}
+
+export function resize(box: Xform) {
+  return {
+    position: {
+      x: box.position.x,
+      y: box.position.y,
+    },
+    size: {
+      x: box.size.x,
+      y: box.size.y,
     },
   };
 }

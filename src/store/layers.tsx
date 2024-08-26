@@ -1,17 +1,33 @@
-import { createReactlessStore } from ".";
-import { clamp } from "../utils";
 import { produce } from "immer";
 import { create } from "zustand";
-import {
-  LayersReactiveStoreData,
-  LayersReactiveStoreFunc,
-  ImagesStore,
-  Sprite,
-  SpriteObject,
-  Xform,
-} from "./types";
+import { Sprite, Xform } from "./common";
+import { createReactlessStore } from ".";
+import { clamp } from "@app/utils";
 
-export const realtimeStore = createReactlessStore<ImagesStore>({
+export type SpriteObject = {
+  locked: boolean;
+  filename: string;
+  width: number;
+  height: number;
+  xform: Xform;
+};
+
+type LayersStore = {
+  images: Sprite[];
+  sprites: SpriteObject[];
+};
+
+type LayersReactiveStoreData = {
+  layers: number[];
+};
+
+type LayersReactiveStoreFunc = {
+  add: (value: number) => void;
+  reorder: (value: number[]) => void;
+  remove: (value: number) => void;
+};
+
+export const layersState = createReactlessStore<LayersStore>({
   images: [],
   sprites: [],
 });
@@ -21,7 +37,7 @@ export function addImage(
   metadata: File,
   dom: HTMLImageElement
 ): [number] {
-  const { sprites } = realtimeStore.update((draft) => {
+  const { sprites } = layersState.update((draft) => {
     draft.images.push(value);
     draft.sprites.push(createBlankSprite(metadata, dom));
   });
@@ -30,13 +46,13 @@ export function addImage(
 }
 
 export function transformImage(i: number, xform: Xform) {
-  realtimeStore.update((draft) => {
+  layersState.update((draft) => {
     draft.sprites[i].xform = xform;
   });
 }
 
 export const removeImage = (index: number) => {
-  realtimeStore.update((draft) => {
+  layersState.update((draft) => {
     draft.images.splice(index, 1);
     draft.sprites.splice(index, 1);
   });
@@ -53,7 +69,7 @@ function createBlankSprite(
     height: dom.height,
     xform: {
       position: { x: 0, y: 0 },
-      scale: { x: 1, y: 1 },
+      size: { x: dom.width, y: dom.height }, // maybe change this later
     },
   };
 }

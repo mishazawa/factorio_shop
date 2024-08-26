@@ -1,11 +1,11 @@
 import { Reorder, useDragControls, useMotionValue } from "framer-motion";
 
-import GRIP_ICON from "../assets/icons/grip.svg";
-import TRASH_ICON from "../assets/icons/trash-can.svg";
+import GRIP_ICON from "@assets/icons/grip.svg";
+import TRASH_ICON from "@assets/icons/trash-can.svg";
+import { useLayersStore, layersState } from "@store/layers";
+import { unloadPImage } from "@app/utils";
+
 import { IconButton } from "./Buttons";
-import { useLayersStore } from "../store/layers";
-import { realtimeStore as rts } from "../store/layers";
-import { unloadPImage } from "../utils";
 
 export function LayerList() {
   const layers = useLayersStore((s) => s.layers);
@@ -25,7 +25,7 @@ export function LayerList() {
 function LayerItem({ item }: { item: number }) {
   const y = useMotionValue(0);
   const dragControls = useDragControls();
-  const meta = rts.read().sprites[item];
+  const meta = layersState.read().sprites[item];
 
   return (
     <Reorder.Item

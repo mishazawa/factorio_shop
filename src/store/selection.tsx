@@ -1,26 +1,37 @@
+import { DEBUG, COLLISION_WIDTH_HALF, COLLISION_WIDTH } from "@app/constants";
 import { createReactlessStore } from ".";
-import { COLLISION_WIDTH, COLLISION_WIDTH_HALF, DEBUG } from "../constants";
-import { SelectBox, SelectionStore, SpriteObject, Vec4 } from "./types";
+import { Vec4, Xform } from "./common";
+import { SpriteObject } from "./layers";
 
-export const realtimeStore = createReactlessStore<SelectionStore>({
+export type SelectBoxHandle = "T" | "R" | "B" | "L" | "TR" | "TL" | "BR" | "BL";
+
+export type SelectBox = Xform;
+
+type SelectionStore = {
+  box: SelectBox;
+  collisions: Vec4[];
+  DEBUG_collisions: Vec4[];
+};
+
+export const selectionState = createReactlessStore<SelectionStore>({
   box: cleanSelection(),
   collisions: calculateCollisionsLUT(cleanSelection()),
   DEBUG_collisions: [],
 });
 
 export function updateSelectionBox(sprite: SpriteObject): SelectionStore {
-  return realtimeStore.update((draft) => {
+  return selectionState.update((draft) => {
     draft.box = cleanSelection(
       sprite.xform.position.x,
       sprite.xform.position.y,
-      sprite.width,
-      sprite.height
+      sprite.xform.size.x,
+      sprite.xform.size.y
     );
   });
 }
 
 export function reset() {
-  realtimeStore.update((draft) => {
+  selectionState.update((draft) => {
     draft.box = cleanSelection();
     draft.collisions = calculateCollisionsLUT(draft.box).map((v) => toAABB(v));
     if (DEBUG) {
@@ -30,7 +41,7 @@ export function reset() {
 }
 
 export function refreshSelection() {
-  realtimeStore.update((draft) => {
+  selectionState.update((draft) => {
     fixNegativeOffsets(draft.box);
     if (DEBUG) {
       draft.DEBUG_collisions = calculateCollisionsLUT(draft.box);
@@ -50,9 +61,9 @@ function cleanSelection(
       x,
       y,
     },
-    offset: {
-      left,
-      top,
+    size: {
+      x: left,
+      y: top,
     },
   };
 }
@@ -65,8 +76,8 @@ function calculateCollisionsLUT(box: SelectBox): Vec4[] {
   const [x0, y0, x1, y1] = [
     box.position.x,
     box.position.y,
-    box.offset.left,
-    box.offset.top,
+    box.size.x,
+    box.size.y,
   ];
   return [
     [
@@ -121,12 +132,12 @@ function calculateCollisionsLUT(box: SelectBox): Vec4[] {
 }
 
 function fixNegativeOffsets(box: SelectBox) {
-  if (box.offset.left < 0) {
-    box.position.x += box.offset.left;
-    box.offset.left = Math.abs(box.offset.left);
+  if (box.size.x < 0) {
+    box.position.x += box.size.x;
+    box.size.x = Math.abs(box.size.x);
   }
-  if (box.offset.top < 0) {
-    box.position.y += box.offset.top;
-    box.offset.top = Math.abs(box.offset.top);
+  if (box.size.y < 0) {
+    box.position.y += box.size.y;
+    box.size.y = Math.abs(box.size.y);
   }
 }

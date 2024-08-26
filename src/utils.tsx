@@ -3,6 +3,8 @@ import { RESPONSIVE_CANVAS } from "./constants";
 import { addImage, removeImage } from "./store/layers";
 import { useLayersStore } from "./store/layers";
 
+// todo refactor this
+
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;
   drawingContext: CanvasRenderingContext2D;

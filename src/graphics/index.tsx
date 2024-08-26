@@ -1,16 +1,19 @@
 import p5 from "p5";
-import { onWindowResize } from "../utils";
+
 import { grid as drawGrid, initUtils } from "./utils";
 import { initRaycast, isMouseInteraction } from "./raycast";
 import {
   drawSelection,
   initSelection,
   onSelectionClick,
+  onSelectionPress,
   onSelectionRelease,
 } from "./selection";
-import { drawLayers, onLayerClick, onLayerHover } from "./layers";
-import { toolsStore } from "../store/tools";
-import { TRANSFORM } from "../constants";
+import { drawLayers, onLayerClick, onLayerHover, onLayerPress } from "./layers";
+import { TRANSFORM, BACKGROUND_COLOR } from "@app/constants";
+import { onWindowResize } from "@app/utils";
+import { frameState } from "@store/frame";
+import { toolsState } from "@store/tools";
 
 export function setup(p: p5) {
   return () => {
@@ -26,24 +29,31 @@ export function setup(p: p5) {
 
 export function draw(p: p5) {
   return () => {
-    // clear screen
-    p.background(250);
+    beforeFrame(p);
 
     drawLayers();
     drawGrid();
 
     withTransformMode(() => {
       onLayerHover();
+      onMouseClick(onLeftMouseClick, p.LEFT);
       onMousePress(onLeftMousePress, p.LEFT);
       onMouseRelease(onLeftMouseRelease, p.LEFT);
       drawSelection();
     });
+
+    afterFrame();
   };
 }
 
 function withTransformMode(callback: () => void) {
-  if (toolsStore.read().mode !== TRANSFORM) return;
+  if (toolsState.read().mode !== TRANSFORM) return;
   callback();
+}
+
+function onMouseClick(cb: () => void, btn: p5.LEFT | p5.RIGHT) {
+  if (!isMouseClick(btn)) return;
+  cb();
 }
 
 function onMousePress(cb: () => void, btn: p5.LEFT | p5.RIGHT) {
@@ -56,11 +66,41 @@ function onMouseRelease(cb: () => void, btn: p5.LEFT | p5.RIGHT) {
   cb();
 }
 
-function onLeftMousePress() {
+function onLeftMouseClick() {
   onSelectionClick();
   onLayerClick();
 }
 
+function onLeftMousePress() {
+  onSelectionPress();
+  onLayerPress();
+}
+
 function onLeftMouseRelease() {
   onSelectionRelease();
+}
+
+function beforeFrame(p: p5) {
+  p.background(BACKGROUND_COLOR);
+
+  frameState.update((fs) => {
+    fs.mouse.curr.left = isMouseInteraction(p.LEFT);
+    fs.mouse.curr.right = isMouseInteraction(p.RIGHT);
+  });
+}
+function afterFrame() {
+  frameState.update((fs) => {
+    fs.mouse.prev.left = fs.mouse.curr.left;
+    fs.mouse.prev.right = fs.mouse.curr.right;
+  });
+}
+
+function isMouseClick(btn: p5.LEFT | p5.RIGHT) {
+  const { mouse } = frameState.read();
+  switch (btn) {
+    case "left":
+      return mouse.curr.left && mouse.curr.left !== mouse.prev.left;
+    case "right":
+      return mouse.curr.right && mouse.curr.right !== mouse.prev.right;
+  }
 }

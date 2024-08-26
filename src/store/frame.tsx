@@ -1,8 +1,29 @@
+import { NO_ACTIVE_LAYER } from "@app/constants";
 import { createReactlessStore } from ".";
-import { NO_ACTIVE_LAYER } from "../constants";
-import { FrameState } from "./types";
+import { SelectBoxHandle } from "./selection";
 
-export const realtimeStore = createReactlessStore<FrameState>({
+export type FrameState = {
+  hover: number;
+  active: number;
+  selection: {
+    drag: boolean;
+    translate: boolean;
+    locked: boolean;
+    handle: null | SelectBoxHandle;
+  };
+  mouse: {
+    prev: {
+      left: boolean;
+      right: boolean;
+    };
+    curr: {
+      left: boolean;
+      right: boolean;
+    };
+  };
+};
+
+export const frameState = createReactlessStore<FrameState>({
   hover: NO_ACTIVE_LAYER,
   active: NO_ACTIVE_LAYER,
   selection: {
@@ -11,8 +32,14 @@ export const realtimeStore = createReactlessStore<FrameState>({
     translate: false,
     locked: false,
   },
-  lastSelectedLayer: NO_ACTIVE_LAYER,
-  lastHoveredLayer: NO_ACTIVE_LAYER,
-  isDrag: false,
-  selectionManipulator: null,
+  mouse: {
+    prev: {
+      left: false,
+      right: false,
+    },
+    curr: {
+      left: false,
+      right: false,
+    },
+  },
 });

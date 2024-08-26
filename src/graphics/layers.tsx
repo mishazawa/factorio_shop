@@ -1,12 +1,11 @@
+import { DEBUG, NO_ACTIVE_LAYER } from "@app/constants";
+import { frameState } from "@app/store/frame";
+import { layersState, useLayersStore } from "@app/store/layers";
+import { updateSelectionBox, refreshSelection } from "@app/store/selection";
 import { hover, image, outline } from "./utils";
-import { realtimeStore as rts, useLayersStore } from "../store/layers";
-
-import { DEBUG, NO_ACTIVE_LAYER } from "../constants";
-import { realtimeStore as frameStateStore } from "../store/frame";
-import { refreshSelection, updateSelectionBox } from "../store/selection";
 
 export function drawLayers() {
-  const store = rts.read();
+  const store = layersState.read();
   const layers = useLayersStore.getState().layers;
 
   const sprites = store.sprites;
@@ -19,14 +18,16 @@ export function drawLayers() {
     image(
       images[lay],
       sprites[lay].xform.position.x,
-      sprites[lay].xform.position.y
+      sprites[lay].xform.position.y,
+      sprites[lay].xform.size.x,
+      sprites[lay].xform.size.y
     );
   }
 }
 
 export function onLayerHover() {
   const layers = useLayersStore.getState().layers;
-  const sprites = rts.read().sprites;
+  const sprites = layersState.read().sprites;
 
   for (let i = 0; i < layers.length; i++) {
     const lay = layers[i];
@@ -34,43 +35,48 @@ export function onLayerHover() {
       hover(
         sprites[lay].xform.position.x,
         sprites[lay].xform.position.y,
-        sprites[lay].width,
-        sprites[lay].height
+        sprites[lay].xform.size.x,
+        sprites[lay].xform.size.y
       )
     ) {
       if (DEBUG) {
-        const { active } = frameStateStore.read();
+        const { active } = frameState.read();
         outline(
           sprites[lay].xform.position.x,
           sprites[lay].xform.position.y,
-          sprites[lay].width,
-          sprites[lay].height,
+          sprites[lay].xform.size.x,
+          sprites[lay].xform.size.y,
           1,
           active === lay ? [0, 255, 0] : [0, 0, 255]
         );
       }
 
-      frameStateStore.update((fs) => {
+      frameState.update((fs) => {
         fs.hover = lay;
       });
 
       return;
     }
   }
-  frameStateStore.update((fs) => {
+  frameState.update((fs) => {
     fs.hover = NO_ACTIVE_LAYER;
   });
 }
 
 export function onLayerClick() {
-  const { selection } = frameStateStore.read();
+  frameState.update((fs) => {
+    fs.active = fs.hover === NO_ACTIVE_LAYER ? NO_ACTIVE_LAYER : fs.hover;
+  });
+}
+
+export function onLayerPress() {
+  const { selection } = frameState.read();
+
   if (selection.drag) return;
 
-  frameStateStore.update((fs) => {
-    fs.active = fs.hover === NO_ACTIVE_LAYER ? NO_ACTIVE_LAYER : fs.hover;
-
+  frameState.update((fs) => {
     if (fs.active !== NO_ACTIVE_LAYER) {
-      updateSelectionBox(rts.read().sprites[fs.active]);
+      updateSelectionBox(layersState.read().sprites[fs.active]);
       refreshSelection();
     }
   });
