@@ -12,6 +12,7 @@ export type SpriteObject = {
   height: number;
   xform: Xform;
   bbox: BBox;
+  crop: Xform;
 };
 
 type LayersStore = {
@@ -83,6 +84,10 @@ function createBlankSprite(
     width: dom.width,
     height: dom.height,
     xform: {
+      position: { x: 0, y: 0 },
+      size: { x: dom.width, y: dom.height }, // maybe change this later
+    },
+    crop: {
       position: { x: 0, y: 0 },
       size: { x: dom.width, y: dom.height }, // maybe change this later
     },

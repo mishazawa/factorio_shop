@@ -2,6 +2,15 @@ import { NO_ACTIVE_LAYER } from "@app/constants";
 import { createReactlessStore } from ".";
 import { SelectBoxHandle } from "./selection";
 
+type MouseState = {
+  left: boolean;
+  right: boolean;
+};
+
+type KeyboardState = {
+  13: boolean;
+};
+
 export type FrameState = {
   hover: number;
   active: number;
@@ -12,14 +21,12 @@ export type FrameState = {
     handle: null | SelectBoxHandle;
   };
   mouse: {
-    prev: {
-      left: boolean;
-      right: boolean;
-    };
-    curr: {
-      left: boolean;
-      right: boolean;
-    };
+    prev: MouseState;
+    curr: MouseState;
+  };
+  keyboard: {
+    prev: KeyboardState;
+    curr: KeyboardState;
   };
 };
 
@@ -41,6 +48,14 @@ export function resetFrame() {
       curr: {
         left: false,
         right: false,
+      },
+    },
+    keyboard: {
+      prev: {
+        13: false,
+      },
+      curr: {
+        13: false,
       },
     },
   };

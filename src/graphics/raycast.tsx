@@ -19,3 +19,7 @@ export function checkAABB({ ax, ay, bx, by }: BBox) {
 export function isMouseInteraction(btn: p5.LEFT | p5.RIGHT) {
   return _PROC.mouseIsPressed && _PROC.mouseButton === btn;
 }
+
+export function isKeyPressed(btn: number) {
+  return _PROC.keyIsDown(btn);
+}

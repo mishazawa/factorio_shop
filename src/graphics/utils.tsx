@@ -80,3 +80,9 @@ export function translate(xform: Xform) {
 export function assignOnlyPositiveValue(v: number, cb: (v: number) => void) {
   return v < 0 ? null : cb(v);
 }
+
+export function sequence(...fns: (() => boolean)[]) {
+  for (let i = 0; i < fns.length; i++) {
+    if (fns[i]()) return;
+  }
+}

@@ -9,3 +9,5 @@ export const OUTLINE_COLOR: [number, number, number] = [255, 204, 0];
 export const COLLISION_WIDTH_HALF = 10;
 export const NO_ACTIVE_LAYER = -1;
 export const TRANSFORM = "TRANSFORM";
+export const CROP = "CROP";
+export const KBD_ENTER = 13;

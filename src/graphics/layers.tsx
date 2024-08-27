@@ -22,7 +22,11 @@ export function drawLayers() {
       sprites[lay].xform.position.x,
       sprites[lay].xform.position.y,
       sprites[lay].xform.size.x,
-      sprites[lay].xform.size.y
+      sprites[lay].xform.size.y,
+      sprites[lay].crop.position.x,
+      sprites[lay].crop.position.y,
+      sprites[lay].crop.size.x,
+      sprites[lay].crop.size.y
     );
   }
 }
@@ -68,6 +72,8 @@ export function onLayerClick() {
     }
     createSelection(layersState.read().sprites[fs.active]);
   });
+
+  return false;
 }
 
 export function onLayerPress() {}

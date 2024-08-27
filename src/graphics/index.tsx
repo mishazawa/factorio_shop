@@ -1,19 +1,23 @@
 import p5 from "p5";
 
-import { grid as drawGrid, initUtils } from "./utils";
-import { initRaycast, isMouseInteraction } from "./raycast";
+import { grid as drawGrid, initUtils, sequence } from "./utils";
+import { initRaycast, isKeyPressed, isMouseInteraction } from "./raycast";
 import {
+  cropImage,
   drawSelection,
   initSelection,
+  onCropPress,
+  onCropRelease,
   onSelectionClick,
   onSelectionPress,
   onSelectionRelease,
 } from "./selection";
 import { drawLayers, onLayerClick, onLayerHover, onLayerPress } from "./layers";
-import { TRANSFORM, BACKGROUND_COLOR } from "@app/constants";
+import { TRANSFORM, BACKGROUND_COLOR, CROP, KBD_ENTER } from "@app/constants";
 import { onWindowResize } from "@app/utils";
 import { frameState } from "@store/frame";
-import { toolsState } from "@store/tools";
+import { ToolMode, toolsState } from "@store/tools";
+import { cloneDeep } from "lodash";
 
 export function setup(p: p5) {
   return () => {
@@ -34,7 +38,7 @@ export function draw(p: p5) {
     drawLayers();
     drawGrid();
 
-    withTransformMode(() => {
+    withMode(TRANSFORM, () => {
       onLayerHover();
       onMouseClick(onLeftMouseClick, p.LEFT);
       onMousePress(onLeftMousePress, p.LEFT);
@@ -42,12 +46,21 @@ export function draw(p: p5) {
       drawSelection();
     });
 
+    withMode(CROP, () => {
+      onLayerHover();
+      onMouseClick(onLeftMouseClick, p.LEFT);
+      onMousePress(onLeftMousePressCrop, p.LEFT);
+      onMouseRelease(onLeftMouseReleaseCrop, p.LEFT);
+      drawSelection();
+      onCropApply(p.ENTER);
+    });
+
     afterFrame();
   };
 }
 
-function withTransformMode(callback: () => void) {
-  if (toolsState.read().mode !== TRANSFORM) return;
+function withMode(mode: ToolMode, callback: () => void) {
+  if (toolsState.read().mode !== mode) return;
   callback();
 }
 
@@ -68,16 +81,30 @@ function onMouseRelease(cb: () => void, btn: p5.LEFT | p5.RIGHT) {
 
 function onLeftMouseClick() {
   // if selection was clicker do not perform any layer ops
-  // kind of prevent bubbling =)
+  // kind of event propagation
   // todo: maybe join layers and selection
   // because selection in kind of special case of layer
-  if (onSelectionClick()) return;
-  onLayerClick();
+  sequence(onSelectionClick, onLayerClick);
 }
 
 function onLeftMousePress() {
   onSelectionPress();
   onLayerPress();
+}
+
+function onLeftMousePressCrop() {
+  onCropPress();
+}
+function onLeftMouseReleaseCrop() {
+  onCropRelease();
+}
+
+function onCropApply(btn: number) {
+  const { keyboard } = frameState.read();
+
+  if (isLeaveState(keyboard.prev[KBD_ENTER], keyboard.curr[KBD_ENTER])) {
+    cropImage();
+  }
 }
 
 function onLeftMouseRelease() {
@@ -90,21 +117,25 @@ function beforeFrame(p: p5) {
   frameState.update((fs) => {
     fs.mouse.curr.left = isMouseInteraction(p.LEFT);
     fs.mouse.curr.right = isMouseInteraction(p.RIGHT);
+
+    fs.keyboard.curr[KBD_ENTER] = isKeyPressed(p.ENTER);
   });
 }
 function afterFrame() {
   frameState.update((fs) => {
-    fs.mouse.prev.left = fs.mouse.curr.left;
-    fs.mouse.prev.right = fs.mouse.curr.right;
+    fs.mouse.prev = cloneDeep(fs.mouse.curr);
+    fs.keyboard.prev = cloneDeep(fs.keyboard.curr);
   });
 }
 
 function isMouseClick(btn: p5.LEFT | p5.RIGHT) {
   const { mouse } = frameState.read();
-  switch (btn) {
-    case "left":
-      return mouse.curr.left && mouse.curr.left !== mouse.prev.left;
-    case "right":
-      return mouse.curr.right && mouse.curr.right !== mouse.prev.right;
-  }
+  return isEnteredState(mouse.prev[btn], mouse.curr[btn]);
+}
+
+function isEnteredState(prev: boolean, curr: boolean) {
+  return curr && curr !== prev;
+}
+function isLeaveState(prev: boolean, curr: boolean) {
+  return !curr && curr !== prev;
 }

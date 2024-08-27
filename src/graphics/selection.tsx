@@ -64,6 +64,38 @@ export function onSelectionClick(): boolean {
   return result;
 }
 
+export function cropImage() {
+  const { active } = frameState.read();
+  // const { xform } = selectionState.read();
+  if (active === NO_ACTIVE_LAYER) return;
+}
+
+export function onCropPress() {
+  const { active, selection } = frameState.read();
+  if (active === NO_ACTIVE_LAYER) return;
+  if (selection.translate) {
+    translateSelection();
+  }
+
+  if (selection.drag && selection.handle) {
+    extendSelection(selection.handle);
+  }
+}
+
+export function onCropRelease() {
+  const { selection, active } = frameState.read();
+  if (active === NO_ACTIVE_LAYER) return;
+
+  if (selection.drag || selection.translate) {
+    updateSelectionBBox();
+  }
+
+  frameState.update((fs) => {
+    fs.selection.drag = false;
+    fs.selection.handle = null;
+  });
+}
+
 export function onSelectionPress() {
   const { active, selection } = frameState.read();
   if (active === NO_ACTIVE_LAYER) return;
@@ -92,11 +124,6 @@ export function onSelectionRelease() {
     const { xform, bbox } = selectionState.read();
 
     applyTransform(active, xform, bbox);
-
-    frameState.update((fs) => {
-      fs.selection.drag = false;
-      fs.selection.handle = null;
-    });
   }
 
   if (selection.translate) {
@@ -105,6 +132,10 @@ export function onSelectionRelease() {
     updateSelectionBBox();
     applyTransform(active, xform, bbox);
   }
+  frameState.update((fs) => {
+    fs.selection.drag = false;
+    fs.selection.handle = null;
+  });
 }
 
 function translateSelection(snap: boolean = false) {
