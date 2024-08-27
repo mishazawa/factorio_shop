@@ -1,6 +1,6 @@
 import p5 from "p5";
 
-import { BBox, Xform } from "@store/common";
+import { Xform } from "@store/common";
 import {
   GRID_COLOR,
   GRID_WIDTH,
@@ -77,27 +77,6 @@ export function translate(xform: Xform) {
   };
 }
 
-export function resize(box: Xform) {
-  return {
-    xform: {
-      position: {
-        x: box.position.x,
-        y: box.position.y,
-      },
-      size: {
-        x: box.size.x,
-        y: box.size.y,
-      },
-    },
-    bbox: absBox(box),
-  };
-}
-
-function absBox(box: Xform): BBox {
-  return {
-    ax: Math.min(box.position.x, box.size.x),
-    ay: Math.min(box.position.y, box.size.y),
-    bx: Math.max(box.position.x, box.size.x),
-    by: Math.max(box.position.y, box.size.y),
-  };
+export function assignOnlyPositiveValue(v: number, cb: (v: number) => void) {
+  return v < 0 ? null : cb(v);
 }

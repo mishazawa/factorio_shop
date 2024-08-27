@@ -65,7 +65,3 @@ export function unloadPImage(layerIndex: number) {
   removeImage(layerIndex);
   useLayersStore.getState().remove(layerIndex);
 }
-
-export function clamp(v: number, min = 0, max = Infinity) {
-  return v < min ? min : v > max ? max : v;
-}

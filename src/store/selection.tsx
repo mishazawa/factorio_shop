@@ -23,13 +23,15 @@ export type SelectBoxHandle =
 
 type SelectionStore = {
   xform: Xform;
-  bbox: BBox;
+  bbox: BBox; // for transformations
+
   collisions: Record<SelectBoxHandle, BBox>;
 };
 
 export const selectionState = createReactlessStore<SelectionStore>({
   xform: emptyXform(),
   bbox: emptyBBox(),
+
   collisions: collisionLUT(emptyBBox()),
 });
 
@@ -37,6 +39,7 @@ export function createSelection(sprite: SpriteObject): SelectionStore {
   return selectionState.update((draft) => {
     draft.xform = cloneDeep(sprite.xform);
     draft.bbox = xtobb(draft.xform);
+
     draft.collisions = collisionLUT(draft.bbox);
   });
 }
@@ -49,6 +52,7 @@ export function updateSelectionXform(sprite: SpriteObject): SelectionStore {
 export function updateSelectionBBox(): SelectionStore {
   return selectionState.update((draft) => {
     draft.bbox = xtobb(draft.xform);
+
     draft.collisions = collisionLUT(draft.bbox);
   });
 }

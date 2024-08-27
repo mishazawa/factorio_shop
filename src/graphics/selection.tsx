@@ -1,5 +1,10 @@
 import p5 from "p5";
-import { outline, snapToGrid, translate } from "./utils";
+import {
+  assignOnlyPositiveValue,
+  outline,
+  snapToGrid,
+  translate,
+} from "./utils";
 
 import { checkAABB } from "./raycast";
 import { NO_ACTIVE_LAYER, DEBUG } from "@app/constants";
@@ -145,9 +150,11 @@ function extendSelection(manipulator: SelectBoxHandle) {
 
 function DEBUG_selection() {
   if (!DEBUG) return;
-  values(selectionState.read().collisions).map(({ ax, ay, bx, by }) =>
-    outline(...([ax, ay, bx - ax, by - ay] as Vec4), DEBUG_LINE, DEBUG_GREEN)
-  );
+  values(selectionState.read().collisions)
+    // .slice(1, 2)
+    .map(({ ax, ay, bx, by }) =>
+      outline(...([ax, ay, bx - ax, by - ay] as Vec4), DEBUG_LINE, DEBUG_GREEN)
+    );
 }
 
 function getManipulatorIntersection(
@@ -161,19 +168,33 @@ function getManipulatorIntersection(
 }
 
 function resizeTop(box: Xform) {
-  box.size.y = box.size.y + box.position.y - _PROC.mouseY;
-  box.position.y = box.position.y - (box.position.y - _PROC.mouseY);
+  assignOnlyPositiveValue(
+    box.size.y + box.position.y - _PROC.mouseY,
+    (result) => {
+      box.size.y = result;
+      box.position.y = box.position.y - (box.position.y - _PROC.mouseY);
+    }
+  );
 }
 
 function resizeLeft(box: Xform) {
-  box.size.x = box.size.x + box.position.x - _PROC.mouseX;
-  box.position.x = box.position.x - (box.position.x - _PROC.mouseX);
+  assignOnlyPositiveValue(
+    box.size.x + box.position.x - _PROC.mouseX,
+    (result) => {
+      box.size.x = result;
+      box.position.x = box.position.x - (box.position.x - _PROC.mouseX);
+    }
+  );
 }
 
 function resizeRight(box: Xform) {
-  box.size.x = _PROC.mouseX - box.position.x;
+  assignOnlyPositiveValue(_PROC.mouseX - box.position.x, (result) => {
+    box.size.x = result;
+  });
 }
 
 function resizeBottom(box: Xform) {
-  box.size.y = _PROC.mouseY - box.position.y;
+  assignOnlyPositiveValue(_PROC.mouseY - box.position.y, (result) => {
+    box.size.y = result;
+  });
 }

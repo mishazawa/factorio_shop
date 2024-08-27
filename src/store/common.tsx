@@ -1,10 +1,12 @@
 import { COLLISION_WIDTH_HALF } from "@app/constants";
 import p5 from "p5";
 
+export type Coords = { x: number; y: number };
+
 // drawing purpose
 export type Xform = {
-  position: { x: number; y: number };
-  size: { x: number; y: number };
+  position: Coords;
+  size: Coords;
 };
 
 // collision/interaction purpose
@@ -27,12 +29,20 @@ export function emptyBBox() {
   return { ax: 0, ay: 0, bx: 0, by: 0 };
 }
 // calculate absolute bbox
-export function xtobb({ position, size }: Xform): BBox {
+export function xtobb({ position, size }: Xform, abs = false): BBox {
+  if (abs) {
+    return {
+      ax: Math.min(position.x, position.x + size.x),
+      ay: Math.min(position.y, position.y + size.y),
+      bx: Math.max(position.x, position.x + size.x),
+      by: Math.max(position.y, position.y + size.y),
+    };
+  }
   return {
-    ax: Math.min(position.x, position.x + size.x),
-    ay: Math.min(position.y, position.y + size.y),
-    bx: Math.max(position.x, position.x + size.x),
-    by: Math.max(position.y, position.y + size.y),
+    ax: position.x,
+    ay: position.y,
+    bx: position.x + size.x,
+    by: position.y + size.y,
   };
 }
 

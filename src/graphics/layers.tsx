@@ -36,6 +36,7 @@ export function onLayerHover() {
     if (checkAABB(sprites[lay].bbox)) {
       if (DEBUG) {
         const { active } = frameState.read();
+
         outline(
           sprites[lay].xform.position.x,
           sprites[lay].xform.position.y,

@@ -2,8 +2,8 @@ import { produce } from "immer";
 import { create } from "zustand";
 import { BBox, Sprite, Xform, xtobb } from "./common";
 import { createReactlessStore } from ".";
-import { clamp } from "@app/utils";
-import { cloneDeep } from "lodash";
+
+import { clamp, cloneDeep } from "lodash";
 
 export type SpriteObject = {
   locked: boolean;
@@ -44,7 +44,7 @@ export function createLayer(
     draft.sprites.push(createBlankSprite(metadata, dom));
   });
   // prevent to return values < 0
-  return [clamp(sprites.length - 1)];
+  return [clamp(sprites.length - 1, 0, Infinity)];
 }
 
 export function copyXform(i: number, xform: Xform) {
@@ -53,7 +53,7 @@ export function copyXform(i: number, xform: Xform) {
   });
 }
 
-export function copyBBox(i: number, bbox: BBox) {
+export function copyBBox(i: number, bbox: BBox, abbox: BBox) {
   layersState.update((draft) => {
     draft.sprites[i].bbox = cloneDeep(bbox);
   });
