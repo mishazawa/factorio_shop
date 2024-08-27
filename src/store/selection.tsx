@@ -1,6 +1,12 @@
-import { COLLISION_WIDTH_HALF } from "@app/constants";
 import { createReactlessStore } from ".";
-import { BBox, emptyBBox, emptyXform, Xform, xtobb } from "./common";
+import {
+  BBox,
+  emptyBBox,
+  emptyXform,
+  generateCollider,
+  Xform,
+  xtobb,
+} from "./common";
 import { SpriteObject } from "./layers";
 import { cloneDeep } from "lodash";
 
@@ -48,78 +54,15 @@ export function updateSelectionBBox(): SelectionStore {
 }
 
 function collisionLUT(bbox: BBox) {
-  const top_left: BBox = {
-    ax: bbox.ax - COLLISION_WIDTH_HALF,
-    ay: bbox.ay - COLLISION_WIDTH_HALF,
-    bx: bbox.ax + COLLISION_WIDTH_HALF,
-    by: bbox.ay + COLLISION_WIDTH_HALF,
-  };
-
-  const top_right: BBox = {
-    ax: bbox.bx - COLLISION_WIDTH_HALF,
-    ay: bbox.ay - COLLISION_WIDTH_HALF,
-    bx: bbox.bx + COLLISION_WIDTH_HALF,
-    by: bbox.ay + COLLISION_WIDTH_HALF,
-  };
-
-  const bottom_left: BBox = {
-    ax: bbox.ax - COLLISION_WIDTH_HALF,
-    ay: bbox.by - COLLISION_WIDTH_HALF,
-    bx: bbox.ax + COLLISION_WIDTH_HALF,
-    by: bbox.by + COLLISION_WIDTH_HALF,
-  };
-
-  const bottom_right: BBox = {
-    ax: bbox.bx - COLLISION_WIDTH_HALF,
-    ay: bbox.by - COLLISION_WIDTH_HALF,
-    bx: bbox.bx + COLLISION_WIDTH_HALF,
-    by: bbox.by + COLLISION_WIDTH_HALF,
-  };
-
-  const center: BBox = {
-    ax: bbox.ax + COLLISION_WIDTH_HALF,
-    ay: bbox.ay + COLLISION_WIDTH_HALF,
-    bx: bbox.bx - COLLISION_WIDTH_HALF,
-    by: bbox.by - COLLISION_WIDTH_HALF,
-  };
-
-  const left: BBox = {
-    ax: bbox.ax - COLLISION_WIDTH_HALF,
-    ay: bbox.ay + COLLISION_WIDTH_HALF,
-    bx: bbox.ax + COLLISION_WIDTH_HALF,
-    by: bbox.by - COLLISION_WIDTH_HALF,
-  };
-
-  const right: BBox = {
-    ax: bbox.bx - COLLISION_WIDTH_HALF,
-    ay: bbox.ay + COLLISION_WIDTH_HALF,
-    bx: bbox.bx + COLLISION_WIDTH_HALF,
-    by: bbox.by - COLLISION_WIDTH_HALF,
-  };
-
-  const top: BBox = {
-    ax: bbox.ax + COLLISION_WIDTH_HALF,
-    ay: bbox.ay - COLLISION_WIDTH_HALF,
-    bx: bbox.bx - COLLISION_WIDTH_HALF,
-    by: bbox.ay + COLLISION_WIDTH_HALF,
-  };
-
-  const bottom: BBox = {
-    ax: bbox.ax + COLLISION_WIDTH_HALF,
-    ay: bbox.by - COLLISION_WIDTH_HALF,
-    bx: bbox.bx - COLLISION_WIDTH_HALF,
-    by: bbox.by + COLLISION_WIDTH_HALF,
-  };
-
   return {
-    C: center,
-    TL: top_left,
-    TR: top_right,
-    BL: bottom_left,
-    BR: bottom_right,
-    L: left,
-    R: right,
-    T: top,
-    B: bottom,
+    C: generateCollider([bbox.ax, bbox.ay, bbox.bx, bbox.by], [1, 1, -1, -1]),
+    TL: generateCollider([bbox.ax, bbox.ay, bbox.ax, bbox.ay], [-1, -1, 1, 1]),
+    TR: generateCollider([bbox.bx, bbox.ay, bbox.bx, bbox.ay], [-1, -1, 1, 1]),
+    BL: generateCollider([bbox.ax, bbox.by, bbox.ax, bbox.by], [-1, -1, 1, 1]),
+    BR: generateCollider([bbox.bx, bbox.by, bbox.bx, bbox.by], [-1, -1, 1, 1]),
+    L: generateCollider([bbox.ax, bbox.ay, bbox.ax, bbox.by], [-1, 1, 1, -1]),
+    R: generateCollider([bbox.bx, bbox.ay, bbox.bx, bbox.by], [-1, 1, 1, -1]),
+    T: generateCollider([bbox.ax, bbox.ay, bbox.bx, bbox.ay], [1, -1, -1, 1]),
+    B: generateCollider([bbox.ax, bbox.by, bbox.bx, bbox.by], [1, -1, -1, 1]),
   };
 }

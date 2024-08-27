@@ -1,3 +1,4 @@
+import { COLLISION_WIDTH_HALF } from "@app/constants";
 import p5 from "p5";
 
 // drawing purpose
@@ -32,5 +33,14 @@ export function xtobb({ position, size }: Xform): BBox {
     ay: Math.min(position.y, position.y + size.y),
     bx: Math.max(position.x, position.x + size.x),
     by: Math.max(position.y, position.y + size.y),
+  };
+}
+
+export function generateCollider(bbox: Vec4, mask: Vec4): BBox {
+  return {
+    ax: bbox[0] + COLLISION_WIDTH_HALF * mask[0],
+    ay: bbox[1] + COLLISION_WIDTH_HALF * mask[1],
+    bx: bbox[2] + COLLISION_WIDTH_HALF * mask[2],
+    by: bbox[3] + COLLISION_WIDTH_HALF * mask[3],
   };
 }
