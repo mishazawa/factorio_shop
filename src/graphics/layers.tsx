@@ -1,8 +1,10 @@
 import { DEBUG, NO_ACTIVE_LAYER } from "@app/constants";
-import { frameState } from "@app/store/frame";
-import { layersState, useLayersStore } from "@app/store/layers";
-import { updateSelectionBox, refreshSelection } from "@app/store/selection";
-import { hover, image, outline } from "./utils";
+import { frameState, resetFrame } from "@store/frame";
+import { layersState, useLayersStore } from "@store/layers";
+
+import { image, outline } from "./utils";
+import { checkAABB } from "./raycast";
+import { createSelection } from "@store/selection";
 
 export function drawLayers() {
   const store = layersState.read();
@@ -31,14 +33,7 @@ export function onLayerHover() {
 
   for (let i = 0; i < layers.length; i++) {
     const lay = layers[i];
-    if (
-      hover(
-        sprites[lay].xform.position.x,
-        sprites[lay].xform.position.y,
-        sprites[lay].xform.size.x,
-        sprites[lay].xform.size.y
-      )
-    ) {
+    if (checkAABB(sprites[lay].bbox)) {
       if (DEBUG) {
         const { active } = frameState.read();
         outline(
@@ -66,18 +61,12 @@ export function onLayerHover() {
 export function onLayerClick() {
   frameState.update((fs) => {
     fs.active = fs.hover === NO_ACTIVE_LAYER ? NO_ACTIVE_LAYER : fs.hover;
-  });
-}
-
-export function onLayerPress() {
-  const { selection } = frameState.read();
-
-  if (selection.drag) return;
-
-  frameState.update((fs) => {
-    if (fs.active !== NO_ACTIVE_LAYER) {
-      updateSelectionBox(layersState.read().sprites[fs.active]);
-      refreshSelection();
+    if (fs.active === NO_ACTIVE_LAYER) {
+      resetFrame();
+      return fs;
     }
+    createSelection(layersState.read().sprites[fs.active]);
   });
 }
+
+export function onLayerPress() {}

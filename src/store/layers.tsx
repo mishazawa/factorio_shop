@@ -1,8 +1,9 @@
 import { produce } from "immer";
 import { create } from "zustand";
-import { Sprite, Xform } from "./common";
+import { BBox, Sprite, Xform, xtobb } from "./common";
 import { createReactlessStore } from ".";
 import { clamp } from "@app/utils";
+import { cloneDeep } from "lodash";
 
 export type SpriteObject = {
   locked: boolean;
@@ -10,6 +11,7 @@ export type SpriteObject = {
   width: number;
   height: number;
   xform: Xform;
+  bbox: BBox;
 };
 
 type LayersStore = {
@@ -32,7 +34,7 @@ export const layersState = createReactlessStore<LayersStore>({
   sprites: [],
 });
 
-export function addImage(
+export function createLayer(
   value: Sprite,
   metadata: File,
   dom: HTMLImageElement
@@ -45,9 +47,22 @@ export function addImage(
   return [clamp(sprites.length - 1)];
 }
 
-export function transformImage(i: number, xform: Xform) {
+export function copyXform(i: number, xform: Xform) {
   layersState.update((draft) => {
-    draft.sprites[i].xform = xform;
+    draft.sprites[i].xform = cloneDeep(xform);
+  });
+}
+
+export function copyBBox(i: number, bbox: BBox) {
+  layersState.update((draft) => {
+    draft.sprites[i].bbox = cloneDeep(bbox);
+  });
+}
+
+export function applyTransform(i: number, xform: Xform, bbox: BBox) {
+  layersState.update((draft) => {
+    draft.sprites[i].xform = cloneDeep(xform);
+    draft.sprites[i].bbox = cloneDeep(bbox);
   });
 }
 
@@ -71,6 +86,10 @@ function createBlankSprite(
       position: { x: 0, y: 0 },
       size: { x: dom.width, y: dom.height }, // maybe change this later
     },
+    bbox: xtobb({
+      position: { x: 0, y: 0 },
+      size: { x: dom.width, y: dom.height }, // maybe change this later
+    }),
   };
 }
 

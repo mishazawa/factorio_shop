@@ -67,7 +67,11 @@ function onMouseRelease(cb: () => void, btn: p5.LEFT | p5.RIGHT) {
 }
 
 function onLeftMouseClick() {
-  onSelectionClick();
+  // if selection was clicker do not perform any layer ops
+  // kind of prevent bubbling =)
+  // todo: maybe join layers and selection
+  // because selection in kind of special case of layer
+  if (onSelectionClick()) return;
   onLayerClick();
 }
 

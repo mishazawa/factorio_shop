@@ -1,7 +1,6 @@
 import p5 from "p5";
 
-import { castAABB } from "./raycast";
-import { Xform } from "@store/common";
+import { BBox, Xform } from "@store/common";
 import {
   GRID_COLOR,
   GRID_WIDTH,
@@ -14,13 +13,6 @@ let _PROC: p5 = null!;
 
 export function initUtils(p: p5) {
   _PROC = p;
-}
-
-export function hover(x: number, y: number, w: number, h: number) {
-  if (castAABB(x, y, x + w, y + h)) {
-    return true;
-  }
-  return false;
 }
 
 export function outline(
@@ -87,13 +79,25 @@ export function translate(xform: Xform) {
 
 export function resize(box: Xform) {
   return {
-    position: {
-      x: box.position.x,
-      y: box.position.y,
+    xform: {
+      position: {
+        x: box.position.x,
+        y: box.position.y,
+      },
+      size: {
+        x: box.size.x,
+        y: box.size.y,
+      },
     },
-    size: {
-      x: box.size.x,
-      y: box.size.y,
-    },
+    bbox: absBox(box),
+  };
+}
+
+function absBox(box: Xform): BBox {
+  return {
+    ax: Math.min(box.position.x, box.size.x),
+    ay: Math.min(box.position.y, box.size.y),
+    bx: Math.max(box.position.x, box.size.x),
+    by: Math.max(box.position.y, box.size.y),
   };
 }

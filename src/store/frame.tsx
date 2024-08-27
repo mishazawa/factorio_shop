@@ -23,23 +23,27 @@ export type FrameState = {
   };
 };
 
-export const frameState = createReactlessStore<FrameState>({
-  hover: NO_ACTIVE_LAYER,
-  active: NO_ACTIVE_LAYER,
-  selection: {
-    drag: false,
-    handle: null,
-    translate: false,
-    locked: false,
-  },
-  mouse: {
-    prev: {
-      left: false,
-      right: false,
+export function resetFrame() {
+  return {
+    hover: NO_ACTIVE_LAYER,
+    active: NO_ACTIVE_LAYER,
+    selection: {
+      drag: false,
+      handle: null,
+      translate: false,
+      locked: false,
     },
-    curr: {
-      left: false,
-      right: false,
+    mouse: {
+      prev: {
+        left: false,
+        right: false,
+      },
+      curr: {
+        left: false,
+        right: false,
+      },
     },
-  },
-});
+  };
+}
+
+export const frameState = createReactlessStore<FrameState>(resetFrame());

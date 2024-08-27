@@ -1,6 +1,6 @@
 import p5 from "p5";
 import { RESPONSIVE_CANVAS } from "./constants";
-import { addImage, removeImage } from "./store/layers";
+import { createLayer, removeImage } from "./store/layers";
 import { useLayersStore } from "./store/layers";
 
 // todo refactor this
@@ -55,7 +55,7 @@ export function loadPImage(file: File) {
     // add data to realtime storage and track layers in UI storage
     useLayersStore
       .getState()
-      .add(...addImage(processingImage, file, fileImage));
+      .add(...createLayer(processingImage, file, fileImage));
   };
 
   reader.readAsDataURL(file);

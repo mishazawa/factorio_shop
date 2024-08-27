@@ -1,3 +1,4 @@
+import { BBox } from "@store/common";
 import p5 from "p5";
 
 let _PROC: p5 = null!;
@@ -6,12 +7,12 @@ export function initRaycast(p: p5) {
   _PROC = p;
 }
 
-export function castAABB(x: number, y: number, w: number, h: number) {
+export function checkAABB({ ax, ay, bx, by }: BBox) {
   return (
-    _PROC.mouseX >= x &&
-    _PROC.mouseX <= w &&
-    _PROC.mouseY >= y &&
-    _PROC.mouseY <= h
+    _PROC.mouseX >= ax &&
+    _PROC.mouseX <= bx &&
+    _PROC.mouseY >= ay &&
+    _PROC.mouseY <= by
   );
 }
 
