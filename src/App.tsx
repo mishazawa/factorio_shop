@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import "./App.scss";
 import { Canvas } from "./components/Canvas";
 import { Tools } from "./components/Tools";
 import { TopMenu } from "./components/TopMenu";
+import { fetchApiDocs } from "./utils";
 
 function App() {
+  useEffect(() => {
+    fetchApiDocs();
+  }, []);
+
   return (
     <div className="Workspace-wrapper">
       <TopMenu />

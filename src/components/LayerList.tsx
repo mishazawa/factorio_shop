@@ -2,17 +2,19 @@ import { Reorder, useDragControls, useMotionValue } from "framer-motion";
 
 import GRIP_ICON from "@assets/icons/grip.svg";
 import TRASH_ICON from "@assets/icons/trash-can.svg";
+import PEN_ICON from "@assets/icons/pen.svg";
 import { useLayersStore, layersState } from "@store/layers";
 import { unloadPImage } from "@app/utils";
 
 import { IconButton } from "./Buttons";
+import { openLayerPanel, setLayerPanelValue } from "@store/tools";
 
 export function LayerList() {
   const layers = useLayersStore((s) => s.layers);
   const reorder = useLayersStore((s) => s.reorder);
 
   return (
-    <div className="Layers-wrapper bordered-dark-concave">
+    <div className="Layer-list bordered-dark-concave scrollbar">
       <Reorder.Group axis="y" values={layers} onReorder={reorder}>
         {layers.map((item) => (
           <LayerItem key={item} item={item} />
@@ -27,6 +29,11 @@ function LayerItem({ item }: { item: number }) {
   const dragControls = useDragControls();
   const meta = layersState.read().sprites[item];
 
+  function openLayerProps() {
+    openLayerPanel(true);
+    setLayerPanelValue(item);
+  }
+
   return (
     <Reorder.Item
       key={item}
@@ -39,6 +46,11 @@ function LayerItem({ item }: { item: number }) {
       <div className="layer-item">
         <div>{meta?.filename}</div>
         <div className="tools">
+          <IconButton
+            icon={PEN_ICON}
+            tooltip="properties"
+            onClick={openLayerProps}
+          />
           <IconButton
             icon={TRASH_ICON}
             tooltip="remove"

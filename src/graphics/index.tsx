@@ -80,7 +80,7 @@ function onMouseRelease(cb: () => void, btn: p5.LEFT | p5.RIGHT) {
 }
 
 function onLeftMouseClick() {
-  // if selection was clicker do not perform any layer ops
+  // if selection was clicked do not perform layer ops
   // kind of event propagation
   // todo: maybe join layers and selection
   // because selection in kind of special case of layer

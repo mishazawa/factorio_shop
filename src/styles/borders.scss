@@ -2,6 +2,9 @@ $bottom: #141314;
 $sides: #212021;
 $top: #7e7e7e;
 
+$inset-start: #14131450;
+$inset-end: #14131405;
+
 $border-size: 0.1rem;
 
 .bordered-dark-convex {
@@ -10,8 +13,17 @@ $border-size: 0.1rem;
   border-bottom: $border-size solid $bottom;
 }
 
+.bordered-dark-sides {
+  border: $border-size solid $sides;
+  border-top: none;
+  border-bottom: none;
+}
 .bordered-dark-concave {
   border: $border-size solid $sides;
   border-top: $border-size solid $bottom;
   border-bottom: $border-size solid $top;
+}
+
+.inset-shadow {
+  box-shadow: $inset-start 3px 0 6px 0px inset, $inset-end -3px 0 6px 1px inset;
 }

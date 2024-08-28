@@ -2,6 +2,7 @@ import p5 from "p5";
 import { RESPONSIVE_CANVAS } from "./constants";
 import { createLayer, removeImage } from "./store/layers";
 import { useLayersStore } from "./store/layers";
+import { initFactorioApi } from "@store/api";
 
 // todo refactor this
 
@@ -64,4 +65,10 @@ export function loadPImage(file: File) {
 export function unloadPImage(layerIndex: number) {
   removeImage(layerIndex);
   useLayersStore.getState().remove(layerIndex);
+}
+
+export function fetchApiDocs() {
+  fetch("/prototype-api.json")
+    .then((r) => r.json())
+    .then(initFactorioApi);
 }

@@ -3,6 +3,19 @@
 @import "styles/buttons/palette0.scss";
 @import "styles/buttons/dimensions.scss";
 @import "styles/borders.scss";
+@import "styles/common.scss";
+@import "styles/dropdown.scss";
+
+* {
+  font-family: "Reddit Mono", monospace;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+h1 {
+  margin: 0;
+  color: $color5;
+  font-size: 1.25rem;
+}
 
 .Workspace-wrapper {
   display: flex;
@@ -17,12 +30,55 @@
 }
 
 .Props-wrapper {
-  background-color: $color1;
   min-width: 25%;
-  padding: 1rem;
   display: flex;
-  flex-direction: column;
+  position: relative;
 
+  .Layer-props {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    overflow-y: scroll;
+    .lp-padding {
+      padding: 1rem;
+    }
+    .gap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  .Left-side {
+    padding: 1rem;
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+    z-index: 2;
+    position: relative;
+    background-color: $color1;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  }
+  .Right-side {
+    z-index: 1;
+    position: absolute;
+    width: 100%;
+
+    height: $viewport-h;
+    top: -$border-size;
+    background-color: $color2;
+
+    &.closed {
+      display: none;
+      left: 0;
+    }
+
+    &.open {
+      transform: translateX(calc(100% - $border-size));
+    }
+  }
   .Tools-wrapper {
     display: flex;
     flex-direction: column;
@@ -31,46 +87,49 @@
   }
   .Layers-wrapper {
     flex: 50%;
-    background-color: $color0;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    scrollbar-color: $color4 $color3;
-    scrollbar-width: thin;
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+
+    .Layer-list {
       display: flex;
       flex-direction: column;
+      height: calc(100% - 2rem);
+      background-color: $color0;
 
-      li {
-        background-color: $color2;
-        padding: 0.5rem;
-        .layer-item {
-          user-select: none;
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
 
-          width: 100%;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: center;
-          .tools {
+        li {
+          background-color: $color2;
+          padding: 0.5rem;
+          .layer-item {
+            user-select: none;
+
+            width: 100%;
             display: flex;
-            gap: 0.25rem;
-          }
-          .drag-zone {
-            &:hover {
-              cursor: grab;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            .tools {
+              display: flex;
+              gap: 0.25rem;
             }
+            .drag-zone {
+              display: flex;
+              width: 16px;
+              height: 32px;
 
-            img {
-              pointer-events: none;
-              user-select: none;
+              &:hover {
+                cursor: grab;
+              }
+
+              img {
+                pointer-events: none;
+                user-select: none;
+              }
             }
-
-            display: flex;
-            width: 16px;
-            height: 32px;
           }
         }
       }
@@ -112,10 +171,17 @@
     background-color: $button5;
   }
 }
+
 .Danger-button {
   &:hover {
     background-color: $button4;
   }
+}
+
+.Link-button {
+  text-align: left;
+  background-color: transparent;
+  border: none;
 }
 
 .Text-button {
@@ -125,4 +191,11 @@
 .Icon-button {
   width: $btn-tool-width;
   height: $btn-tool-height;
+}
+
+.scrollbar {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-color: $color4 $color3;
+  scrollbar-width: thin;
 }
