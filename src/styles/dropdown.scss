@@ -23,10 +23,14 @@
       border-top: $border-size solid $top;
       border-bottom: $border-size solid $bottom;
     }
+    .openDropDown {
+      background-color: $color4;
+    }
   }
 
   .dropdown-content {
-    display: none;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     top: calc($btn-tool-height + $border-size * 4);
     background-color: $color3;
@@ -39,12 +43,6 @@
 
     button:hover {
       background-color: $color5;
-    }
-  }
-  &:hover {
-    .dropdown-content {
-      display: flex;
-      flex-direction: column;
     }
   }
 }

@@ -5,12 +5,18 @@
 @import "styles/borders.scss";
 @import "styles/common.scss";
 @import "styles/dropdown.scss";
+@import "styles/inputs.scss";
 
 * {
   font-family: "Reddit Mono", monospace;
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+*:focus {
+  outline: 0.075rem solid $color4;
+}
+
 h1 {
   margin: 0;
   color: $color5;

@@ -1,0 +1,20 @@
+.joined-tuple {
+  width: 100%;
+  height: $btn-tool-height;
+  display: flex;
+  justify-content: space-between;
+  margin: 0.125rem 0;
+  gap: 1rem;
+  input[type="number"] {
+    min-width: 0;
+    flex-shrink: 2;
+    border: 0;
+    // max-width: 100px;
+  }
+}
+
+.union {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}

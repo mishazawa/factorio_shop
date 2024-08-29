@@ -10,62 +10,84 @@ type BasicMember = {
   images?: { filename: string; caption: string }[];
 };
 
-type Property = BasicMember & {
-  visibility?: string[];
-  alt_name?: string;
-  override: boolean;
-  type: ComplexType;
-  optional: boolean;
-  default: string | Literal;
+type Inherits = {
+  parent: string;
 };
 
-type Literal = {
-  complex_type: "literal";
+export type Property = BasicMember &
+  Inherits & {
+    visibility?: string[];
+    alt_name?: string;
+    override: boolean;
+    type: string | ComplexType;
+    optional: boolean;
+    default: string | FLiteral;
+  };
+
+export type FComplexTypeOptions =
+  | "literal"
+  | "array"
+  | "dictionary"
+  | "tuple"
+  | "union"
+  | "type"
+  | "struct";
+
+export type FComplexType<T> = {
+  complex_type: T;
+};
+
+export type FLiteral = FComplexType<"literal"> & {
   value: string | number | boolean;
   description?: string;
 };
-type ComplexType =
-  | string
-  | Literal
-  | {
-      complex_type: "array";
-      value: ComplexType;
-    }
-  | {
-      complex_type: "dictionary";
-      key: ComplexType;
-      value: ComplexType;
-    }
-  | {
-      complex_type: "tuple";
-      values: ComplexType[];
-    }
-  | {
-      complex_type: "union";
-      options: ComplexType[];
-      full_format: boolean;
-    }
-  | {
-      complex_type: "struct";
-    }
-  | {
-      complex_type: "type";
-      value: ComplexType;
-      description: string;
-    };
 
-type Prototype = BasicMember & {
-  abstract: boolean;
-  deprecated: boolean;
-  properties: Property[];
+type FArray = FComplexType<"array"> & {
+  value: ComplexType | string;
 };
 
-export type Concept = BasicMember & {
-  abstract: boolean;
-  inline: boolean;
-  type: ComplexType;
-  properties?: Property[];
+type FDict = FComplexType<"dictionary"> & {
+  key: ComplexType | string;
+  value: ComplexType | string;
 };
+
+export type FTuple = FComplexType<"tuple"> & {
+  values: ComplexType[] | string[];
+};
+export type FUnion = FComplexType<"union"> & {
+  options: ComplexType[] | string[];
+  full_format: boolean;
+};
+
+type FType = FComplexType<"type"> & {
+  value: ComplexType | string;
+  description: string;
+};
+type FStruct = FComplexType<"struct"> & Record<string, any>;
+
+export type ComplexType =
+  | FArray
+  | FDict
+  | FTuple
+  | FUnion
+  | FStruct
+  | FType
+  | FLiteral;
+
+type Prototype = BasicMember &
+  Inherits & {
+    abstract: boolean;
+    deprecated: boolean;
+    properties: Property[];
+  };
+
+export type Concept = BasicMember &
+  Inherits & {
+    abstract: boolean;
+    inline: boolean;
+    type: ComplexType;
+    properties?: Property[];
+  };
 
 type FactorioApi = {
   application: "factorio";
