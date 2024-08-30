@@ -4,11 +4,9 @@ import { setMode, useToolsStore } from "@store/tools";
 import MOVE_TOOL_ICON from "@assets/icons/translate.svg";
 import CROP_TOOL_ICON from "@assets/icons/crop.svg";
 import { LayerList } from "./LayerList";
-import { LayerProperties } from "./LayerProperties";
 
 export function Tools() {
   const activeMode = useToolsStore((s) => s.mode);
-  const isPanelOpen = useToolsStore((s) => s.isLayerPanelOpened);
 
   return (
     <div className="Props-wrapper bordered-dark-convex">
@@ -31,13 +29,6 @@ export function Tools() {
           <h1>Layers</h1>
           <LayerList />
         </div>
-      </div>
-      <div
-        className={`Right-side bordered-dark-sides inset-shadow ${
-          isPanelOpen ? "open" : "closed"
-        }`}
-      >
-        <LayerProperties />
       </div>
     </div>
   );

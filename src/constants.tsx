@@ -11,3 +11,27 @@ export const NO_ACTIVE_LAYER = -1;
 export const TRANSFORM = "TRANSFORM";
 export const CROP = "CROP";
 export const KBD_ENTER = 13;
+
+export const UINT8 = {
+  int: true,
+  min: 0,
+  max: 255,
+};
+
+export const INT16 = {
+  int: true,
+  min: -32768,
+  max: 32767,
+};
+
+export const WHITELIST_TYPES = [
+  "SpriteParameters",
+  "AnimationParameters",
+  "Animation",
+  "AnimationSheet",
+  "RotatedAnimation",
+  "RotatedSprite",
+  "Sprite",
+  "SpriteNWaySheet",
+  "SpriteSheet",
+];

@@ -1,3 +1,4 @@
+import { WHITELIST_TYPES } from "@app/constants";
 import { filter, includes } from "lodash";
 import { create } from "zustand";
 
@@ -19,10 +20,25 @@ export type Property = BasicMember &
     visibility?: string[];
     alt_name?: string;
     override: boolean;
-    type: string | ComplexType;
+    type: SimpleType | ComplexType;
     optional: boolean;
-    default: string | FLiteral;
+    default: number | string | FLiteral;
   };
+
+export type BuiltInType =
+  | "bool"
+  | "double"
+  | "float"
+  | "int16"
+  | "int32"
+  | "int8"
+  | "string"
+  | "uint16"
+  | "uint32"
+  | "uint64"
+  | "uint8";
+
+export type SimpleType = string;
 
 export type FComplexTypeOptions =
   | "literal"
@@ -42,7 +58,7 @@ export type FLiteral = FComplexType<"literal"> & {
   description?: string;
 };
 
-type FArray = FComplexType<"array"> & {
+export type FArray = FComplexType<"array"> & {
   value: ComplexType | string;
 };
 
@@ -54,6 +70,7 @@ type FDict = FComplexType<"dictionary"> & {
 export type FTuple = FComplexType<"tuple"> & {
   values: ComplexType[] | string[];
 };
+
 export type FUnion = FComplexType<"union"> & {
   options: ComplexType[] | string[];
   full_format: boolean;
@@ -63,7 +80,8 @@ type FType = FComplexType<"type"> & {
   value: ComplexType | string;
   description: string;
 };
-type FStruct = FComplexType<"struct"> & Record<string, any>;
+
+type FStruct = FComplexType<"struct">;
 
 export type ComplexType =
   | FArray
@@ -85,7 +103,7 @@ export type Concept = BasicMember &
   Inherits & {
     abstract: boolean;
     inline: boolean;
-    type: ComplexType;
+    type: ComplexType | "builtin";
     properties?: Property[];
   };
 
@@ -100,6 +118,7 @@ type FactorioApi = {
 
 type FactorioApiStore = {
   api: null | FactorioApi;
+  editorTypes: Concept[];
   loaded: boolean;
   current: string;
 };
@@ -108,23 +127,10 @@ type FactorioApiStoreFunc = {
   setCurrentType: (v: string) => void;
 };
 
-const WHITELIST_PROTOTYPES = ["SpritePrototype", "AnimationPrototype"];
-
-const WHITELIST_TYPES = [
-  "SpriteParameters",
-  "AnimationParameters",
-  "Animation",
-  "AnimationSheet",
-  "RotatedAnimation",
-  "RotatedSprite",
-  "Sprite",
-  "SpriteNWaySheet",
-  "SpriteSheet",
-];
-
 export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
   (set) => ({
     api: null,
+    editorTypes: [],
     loaded: false,
     current: "SpriteParameters",
     setCurrentType: (current: string) => set({ current }),
@@ -132,16 +138,9 @@ export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
 );
 
 export function initFactorioApi(resp: FactorioApi) {
-  const data: FactorioApi = {
-    ...resp,
-    prototypes: filter(resp.prototypes, (o) =>
-      includes(WHITELIST_PROTOTYPES, o.name)
-    ),
-    types: filter(resp.types, (o) => includes(WHITELIST_TYPES, o.name)),
-  };
-
   useFactorioApi.setState({
-    api: data,
+    api: resp,
+    editorTypes: filter(resp.types, (o) => includes(WHITELIST_TYPES, o.name)),
     loaded: true,
     current: "SpriteParameters",
   });

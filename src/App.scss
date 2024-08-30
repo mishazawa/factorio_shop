@@ -34,12 +34,25 @@ h1 {
   padding: 1rem;
   background-color: $color0;
 }
+.Right-side {
+  z-index: 1;
+  position: absolute;
+  max-width: 25%;
 
-.Props-wrapper {
-  min-width: 25%;
-  display: flex;
-  position: relative;
+  // height: $viewport-h;
+  height: 100%;
+  top: -$border-size;
+  background-color: $color2;
 
+  &.closed {
+    display: none;
+    left: 0;
+  }
+
+  &.open {
+    right: 0;
+    // transform: translateX(calc(100% - $border-size));
+  }
   .Layer-props {
     height: 100%;
     display: flex;
@@ -56,6 +69,12 @@ h1 {
       gap: 0.5rem;
     }
   }
+}
+
+.Props-wrapper {
+  min-width: 25%;
+  display: flex;
+  position: relative;
 
   .Left-side {
     padding: 1rem;
@@ -67,24 +86,7 @@ h1 {
     background-color: $color1;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
   }
-  .Right-side {
-    z-index: 1;
-    position: absolute;
-    width: 100%;
 
-    height: $viewport-h;
-    top: -$border-size;
-    background-color: $color2;
-
-    &.closed {
-      display: none;
-      left: 0;
-    }
-
-    &.open {
-      transform: translateX(calc(100% - $border-size));
-    }
-  }
   .Tools-wrapper {
     display: flex;
     flex-direction: column;
@@ -159,7 +161,9 @@ h1 {
   &full-heigth {
     height: 100%;
   }
-
+  &pos-rel {
+    position: relative;
+  }
   &hidden {
     display: none;
   }
