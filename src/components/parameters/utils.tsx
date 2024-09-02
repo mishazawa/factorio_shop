@@ -1,12 +1,21 @@
+import { useFactorioApi } from "@store/api";
 import {
-  ComplexType,
-  Concept,
-  FLiteral,
-  Property,
   SimpleType,
-  useFactorioApi,
-} from "@store/api";
-import { every, filter, find, head, isString } from "lodash";
+  ComplexType,
+  FLiteral,
+  Concept,
+  Property,
+} from "@store/factorio-api.types";
+import {
+  clone,
+  every,
+  filter,
+  find,
+  head,
+  isString,
+  toInteger,
+  toNumber,
+} from "lodash";
 
 function lookupType(t: string) {
   return find(useFactorioApi.getState().api?.types, ({ name }) => name === t);
@@ -57,4 +66,16 @@ export function getParentsRecursive(
   if (!v || !v.properties) return [];
   if (!v.parent) return [v.properties];
   return [v.properties, ...getParentsRecursive(concepts, v.parent)];
+}
+
+export function setTupleValue<T>(value: T[], element: T, index: number) {
+  let tmp = clone(value);
+  if (!tmp) tmp = [];
+  tmp[index] = element;
+  return tmp;
+}
+
+export function validateInt<T>(value: T, isInt: boolean) {
+  const n = toNumber(value);
+  return isInt ? toInteger(n) : n;
 }

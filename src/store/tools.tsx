@@ -1,12 +1,10 @@
 import { produce } from "immer";
 import { create } from "zustand";
 import { createReactlessStore } from ".";
-import { NO_ACTIVE_LAYER } from "@app/constants";
 
 type ToolsStore = {
   mode: ToolMode;
   isLayerPanelOpened: boolean;
-  index: number;
 };
 
 type ToolsStoreFunc = {
@@ -22,7 +20,6 @@ export const toolsState = createReactlessStore<Pick<ToolsStore, "mode">>({
 export const useToolsStore = create<ToolsStore & ToolsStoreFunc>((set) => ({
   mode: "NONE",
   isLayerPanelOpened: false,
-  index: NO_ACTIVE_LAYER,
   setMode(mode: ToolMode) {
     set(
       produce((draft) => {
@@ -41,7 +38,4 @@ export function setMode(mode: ToolMode) {
 
 export function openLayerPanel(value: boolean) {
   useToolsStore.setState({ isLayerPanelOpened: value });
-}
-export function setLayerPanelValue(index: number) {
-  useToolsStore.setState({ index });
 }

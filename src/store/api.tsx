@@ -1,111 +1,9 @@
-import { WHITELIST_TYPES } from "@app/constants";
+import { NO_ACTIVE_LAYER, WHITELIST_TYPES } from "@app/constants";
 import { filter, includes } from "lodash";
 import { create } from "zustand";
-
-type BasicMember = {
-  name: string;
-  order: number;
-  description: string;
-  lists?: string[];
-  examples?: string[];
-  images?: { filename: string; caption: string }[];
-};
-
-type Inherits = {
-  parent: string;
-};
-
-export type Property = BasicMember &
-  Inherits & {
-    visibility?: string[];
-    alt_name?: string;
-    override: boolean;
-    type: SimpleType | ComplexType;
-    optional: boolean;
-    default: number | string | FLiteral;
-  };
-
-export type BuiltInType =
-  | "bool"
-  | "double"
-  | "float"
-  | "int16"
-  | "int32"
-  | "int8"
-  | "string"
-  | "uint16"
-  | "uint32"
-  | "uint64"
-  | "uint8";
-
-export type SimpleType = string;
-
-export type FComplexTypeOptions =
-  | "literal"
-  | "array"
-  | "dictionary"
-  | "tuple"
-  | "union"
-  | "type"
-  | "struct";
-
-export type FComplexType<T> = {
-  complex_type: T;
-};
-
-export type FLiteral = FComplexType<"literal"> & {
-  value: string | number | boolean;
-  description?: string;
-};
-
-export type FArray = FComplexType<"array"> & {
-  value: ComplexType | string;
-};
-
-type FDict = FComplexType<"dictionary"> & {
-  key: ComplexType | string;
-  value: ComplexType | string;
-};
-
-export type FTuple = FComplexType<"tuple"> & {
-  values: ComplexType[] | string[];
-};
-
-export type FUnion = FComplexType<"union"> & {
-  options: ComplexType[] | string[];
-  full_format: boolean;
-};
-
-type FType = FComplexType<"type"> & {
-  value: ComplexType | string;
-  description: string;
-};
-
-type FStruct = FComplexType<"struct">;
-
-export type ComplexType =
-  | FArray
-  | FDict
-  | FTuple
-  | FUnion
-  | FStruct
-  | FType
-  | FLiteral;
-
-type Prototype = BasicMember &
-  Inherits & {
-    abstract: boolean;
-    deprecated: boolean;
-    properties: Property[];
-  };
-
-export type Concept = BasicMember &
-  Inherits & {
-    abstract: boolean;
-    inline: boolean;
-    type: ComplexType | "builtin";
-    properties?: Property[];
-  };
+import { Prototype, Concept, AttributeValue } from "./factorio-api.types";
+import { produce } from "immer";
+import { insert } from "@app/utils";
 
 type FactorioApi = {
   application: "factorio";
@@ -116,15 +14,24 @@ type FactorioApi = {
   types: Concept[];
 };
 
+type LayerAttributes = {
+  type: string;
+  attributes: Record<string, AttributeValue>;
+};
+
 type FactorioApiStore = {
   api: null | FactorioApi;
   editorTypes: Concept[];
   loaded: boolean;
-  current: string;
+  activeLayerIndex: number;
+  layers: LayerAttributes[];
 };
 
 type FactorioApiStoreFunc = {
-  setCurrentType: (v: string) => void;
+  setActiveLayer: (v: number) => void;
+  setLayerType: (v: string) => void;
+  setLayerAttribute: (name: string, value: AttributeValue) => void;
+  createLayer: (index: number) => void;
 };
 
 export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
@@ -132,8 +39,14 @@ export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
     api: null,
     editorTypes: [],
     loaded: false,
-    current: "SpriteParameters",
-    setCurrentType: (current: string) => set({ current }),
+    activeLayerIndex: NO_ACTIVE_LAYER,
+    layers: [],
+    createLayer: (index: number) => set(initLayerProperties(index)),
+    setActiveLayer: (activeLayerIndex: number) => set({ activeLayerIndex }),
+    setLayerType: (v: string) => set(setLayerType(v)),
+    setLayerAttribute: (name: string, value: AttributeValue) => {
+      set(setLayerAttribute(name, value));
+    },
   })
 );
 
@@ -142,6 +55,29 @@ export function initFactorioApi(resp: FactorioApi) {
     api: resp,
     editorTypes: filter(resp.types, (o) => includes(WHITELIST_TYPES, o.name)),
     loaded: true,
-    current: "SpriteParameters",
+  });
+}
+
+function initLayerProperties(index: number) {
+  return produce((s: FactorioApiStore) => {
+    s.layers = insert(s.layers, index, createLayer());
+  });
+}
+
+function createLayer() {
+  return {
+    type: "SpriteParameters",
+    attributes: {},
+  };
+}
+function setLayerType(value: string) {
+  return produce((s: FactorioApiStore) => {
+    s.layers[s.activeLayerIndex].type = value;
+  });
+}
+
+function setLayerAttribute(name: string, value: AttributeValue) {
+  return produce((s: FactorioApiStore) => {
+    s.layers[s.activeLayerIndex].attributes[name] = value;
   });
 }

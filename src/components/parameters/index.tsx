@@ -1,11 +1,13 @@
-import { ComplexType, Concept, Property } from "@store/api";
 import { Description } from "./Description";
 import { Settings } from "./Settings";
 import { differenceWith, filter, head, reverse } from "lodash";
 import { getParentsRecursive } from "./utils";
+import { Property, ComplexType, Concept } from "@store/factorio-api.types";
 
 export type ParameterProps = {
   property: Property;
+  index?: number;
+  indexed?: boolean;
 };
 
 export type ErrorProps = {
@@ -53,6 +55,7 @@ export function ParameterInputList({ params = [] }: { params?: Property[] }) {
     IGNORED_PARAMETERS,
     (a, b) => a.name === b.name
   );
+
   return (
     <>
       {cleanList.map((p) => (

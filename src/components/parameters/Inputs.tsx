@@ -1,42 +1,72 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useCallback } from "react";
 import { ParameterProps } from ".";
-import {
-  ComplexType,
-  FArray,
-  FLiteral,
-  FTuple,
-  FUnion,
-  Property,
-} from "@store/api";
 
 import { ErrorProperty } from "./Error";
-import { isString, noop } from "lodash";
+import { isString, nth, toArray } from "lodash";
 import {
   decomposeComplexType,
   isColor,
   isOptionPicker,
   isTuple,
   isVector,
+  setTupleValue,
   unionToOptions,
+  validateInt,
 } from "./utils";
 import { Dropdown } from "./Dropdown";
 import { UINT8, INT16 } from "@app/constants";
 import { RenderSimpleType } from "./Settings";
+import {
+  FArray,
+  ComplexType,
+  FLiteral,
+  FUnion,
+  FTuple,
+  Property,
+  AttributeValue,
+} from "@store/factorio-api.types";
+import { useFactorioApi } from "@store/api";
 
-type PNumberProps = { int?: boolean; max?: number; min?: number };
+type PNumberProps = {
+  int?: boolean;
+  max?: number;
+  min?: number;
+  indexed?: boolean;
+  index?: number;
+};
+
+function useStoreAttribute<T>({
+  name,
+}: Property): [T, (v: AttributeValue) => void] {
+  const idx = useFactorioApi((s) => s.activeLayerIndex);
+  const value = useFactorioApi((s) => s.layers[idx].attributes[name]);
+  const setState = useFactorioApi((s) => s.setLayerAttribute);
+  const fn = useCallback((v: any) => setState(name, v), [name, setState]);
+  return [value as T, fn];
+}
 
 export function Bool({ property }: ParameterProps) {
+  const [val, set] = useStoreAttribute<boolean>(property);
   return (
     <div>
-      <input type="checkbox" name={property.name} title={property.name} />
+      <input
+        type="checkbox"
+        checked={val}
+        onChange={(e) => set(e.currentTarget.checked)}
+        name={property.name}
+        title={property.name}
+      />
     </div>
   );
 }
 
 export function PString({ property }: ParameterProps) {
+  const [val, set] = useStoreAttribute<string>(property);
   return (
     <div>
       <input
+        value={val}
+        onChange={(e) => set(e.currentTarget.value)}
         type="text"
         placeholder={property.name}
         name={property.name}
@@ -51,21 +81,29 @@ export function PNumber({
   int = false,
   max = Infinity,
   min = -Infinity,
+  indexed = false,
+  index = 0,
 }: ParameterProps & PNumberProps) {
-  // temp
-  const [val, set] = useState<number>(undefined!);
+  const [val, set] = useStoreAttribute<number[]>(property);
+
+  function prepareValue(e: ChangeEvent<HTMLInputElement>) {
+    const value = validateInt(e.currentTarget.value, int);
+    if (indexed) return setTupleValue(val, value, index);
+    return value;
+  }
+
+  function unpackValue(): number | undefined {
+    return indexed ? nth(val, index) : (val as unknown as number);
+  }
+
   function onChange(e: ChangeEvent<HTMLInputElement>) {
-    set(
-      int
-        ? Math.floor(Number(e.currentTarget.value))
-        : Number(e.currentTarget.value)
-    );
+    set(prepareValue(e));
   }
 
   return (
     <div>
       <input
-        value={val}
+        value={unpackValue()}
         type="number"
         name={property.name}
         title={property.name}
@@ -84,8 +122,8 @@ export function Vector2({
 }: ParameterProps & { details: [PNumberProps, PNumberProps] }) {
   return (
     <div className="vector2">
-      <PNumber property={property} {...details[0]} />
-      <PNumber property={property} {...details[1]} />
+      <PNumber property={property} {...details[0]} indexed index={0} />
+      <PNumber property={property} {...details[1]} indexed index={1} />
     </div>
   );
 }
@@ -98,10 +136,10 @@ export function Vector4({
 }) {
   return (
     <div className="vector4">
-      <PNumber property={property} {...details[0]} />
-      <PNumber property={property} {...details[1]} />
-      <PNumber property={property} {...details[2]} />
-      <PNumber property={property} {...details[3]} />
+      <PNumber property={property} {...details[0]} indexed index={0} />
+      <PNumber property={property} {...details[1]} indexed index={1} />
+      <PNumber property={property} {...details[2]} indexed index={2} />
+      <PNumber property={property} {...details[3]} indexed index={3} />
     </div>
   );
 }
@@ -111,8 +149,22 @@ type POptions = {
 };
 
 export function PArray({ property, options }: ParameterProps & POptions) {
+  const [val, set] = useStoreAttribute<string[]>(property);
+
+  function prepareValue(e: ChangeEvent<HTMLSelectElement>) {
+    return toArray(e.currentTarget.selectedOptions).map(
+      (option) => option.value
+    );
+  }
+
   return (
-    <select name={property.name} id="cars" multiple>
+    <select
+      name={property.name}
+      id="cars"
+      multiple
+      value={val || []}
+      onChange={(e) => set(prepareValue(e))}
+    >
       {options.map((o) => (
         <option value={o} key={o}>
           {o}
@@ -148,15 +200,17 @@ export function RenderUnion({
   inferedType,
   property,
 }: ParameterProps & { inferedType: FUnion }) {
+  const [val, set] = useStoreAttribute<string>(property);
+
   if (!inferedType.options.length)
     return <ErrorProperty property={inferedType} />;
 
   if (isOptionPicker(inferedType.options as ComplexType[])) {
     return (
       <Dropdown
-        current={(inferedType.options[0] as FLiteral).value as string}
+        current={val || ((inferedType.options[0] as FLiteral).value as string)}
         options={unionToOptions(inferedType.options as FLiteral[])}
-        onClick={noop}
+        onClick={set}
       />
     );
   }
@@ -198,6 +252,8 @@ export function RenderTuple({
                 type: v,
               } as Property
             }
+            indexed
+            index={i}
             key={i}
           />
         );

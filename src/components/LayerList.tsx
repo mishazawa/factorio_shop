@@ -7,7 +7,8 @@ import { useLayersStore, layersState } from "@store/layers";
 import { unloadPImage } from "@app/utils";
 
 import { IconButton } from "./Buttons";
-import { openLayerPanel, setLayerPanelValue } from "@store/tools";
+import { openLayerPanel } from "@store/tools";
+import { useFactorioApi } from "@store/api";
 
 export function LayerList() {
   const layers = useLayersStore((s) => s.layers);
@@ -31,7 +32,7 @@ function LayerItem({ item }: { item: number }) {
 
   function openLayerProps() {
     openLayerPanel(true);
-    setLayerPanelValue(item);
+    useFactorioApi.getState().setActiveLayer(item);
   }
 
   return (

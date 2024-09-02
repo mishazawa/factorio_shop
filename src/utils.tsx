@@ -2,7 +2,7 @@ import p5 from "p5";
 import { RESPONSIVE_CANVAS } from "./constants";
 import { createLayer, removeImage } from "./store/layers";
 import { useLayersStore } from "./store/layers";
-import { initFactorioApi } from "@store/api";
+import { initFactorioApi, useFactorioApi } from "@store/api";
 
 // todo refactor this
 
@@ -54,9 +54,9 @@ export function loadPImage(file: File) {
     processingImage.modified = true;
 
     // add data to realtime storage and track layers in UI storage
-    useLayersStore
-      .getState()
-      .add(...createLayer(processingImage, file, fileImage));
+    const [index] = createLayer(processingImage, file, fileImage);
+    useLayersStore.getState().add(index);
+    useFactorioApi.getState().createLayer(index);
   };
 
   reader.readAsDataURL(file);
@@ -71,4 +71,8 @@ export function fetchApiDocs() {
   fetch("/prototype-api.json")
     .then((r) => r.json())
     .then(initFactorioApi);
+}
+
+export function insert<T>(arr: T[], index: number, newItem: T) {
+  return [...arr.slice(0, index), newItem, ...arr.slice(index)];
 }
