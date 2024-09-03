@@ -8,3 +8,11 @@ $viewport-h: calc(100% + $border-size * 2);
 .between {
   justify-content: space-between;
 }
+
+.flex-row {
+  flex-direction: row;
+}
+
+.gap-1 {
+  gap: 1rem;
+}

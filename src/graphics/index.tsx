@@ -1,6 +1,6 @@
 import p5 from "p5";
 
-import { grid as drawGrid, initUtils, sequence } from "./utils";
+import { grid as drawGrid, initUtils, onWindowResize, sequence } from "./utils";
 import { initRaycast, isKeyPressed, isMouseInteraction } from "./raycast";
 import {
   cropImage,
@@ -14,7 +14,7 @@ import {
 } from "./selection";
 import { drawLayers, onLayerClick, onLayerHover, onLayerPress } from "./layers";
 import { TRANSFORM, BACKGROUND_COLOR, CROP, KBD_ENTER } from "@app/constants";
-import { onWindowResize } from "@app/utils";
+
 import { frameState } from "@store/frame";
 import { ToolMode, toolsState } from "@store/tools";
 import { cloneDeep } from "lodash";

@@ -4,11 +4,11 @@ import GRIP_ICON from "@assets/icons/grip.svg";
 import TRASH_ICON from "@assets/icons/trash-can.svg";
 import PEN_ICON from "@assets/icons/pen.svg";
 import { useLayersStore, layersState } from "@store/layers";
-import { unloadPImage } from "@app/utils";
 
 import { IconButton } from "./Buttons";
 import { openLayerPanel } from "@store/tools";
 import { useFactorioApi } from "@store/api";
+import { unloadPImage } from "@app/graphics/utils";
 
 export function LayerList() {
   const layers = useLayersStore((s) => s.layers);

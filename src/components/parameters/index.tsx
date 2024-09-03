@@ -5,7 +5,7 @@ import { getParentsRecursive } from "./utils";
 import { Property, ComplexType, Concept } from "@store/factorio-api.types";
 import { useFactorioApi } from "@store/api";
 import { If } from "../UIKit";
-import { DEBUG } from "@app/constants";
+import { DEBUG, IGNORED_PARAMETERS } from "@app/constants";
 
 export type ParameterProps = {
   property: Property;
@@ -58,14 +58,12 @@ function ParameterInput(args: ParameterProps) {
   );
 }
 
-const IGNORED_PARAMETERS = ["layers", "stripes", "hr_version", "filename"].map(
-  (name) => ({ name })
-);
+const parametersToSkip = IGNORED_PARAMETERS.map((name) => ({ name }));
 
 export function ParameterInputList({ params = [] }: { params?: Property[] }) {
   const cleanList = differenceWith(
     params,
-    IGNORED_PARAMETERS,
+    parametersToSkip,
     (a, b) => a.name === b.name
   );
 
@@ -80,6 +78,6 @@ export function ParameterInputList({ params = [] }: { params?: Property[] }) {
 
 export function DebugStore() {
   const _ = useFactorioApi((s) => s.layers);
-  console.log(_);
+  console.log("Parameters: ", JSON.stringify(_, null, 2));
   return null;
 }

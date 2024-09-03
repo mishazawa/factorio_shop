@@ -1,4 +1,8 @@
-import { NO_ACTIVE_LAYER, WHITELIST_TYPES } from "@app/constants";
+import {
+  DEFAULT_LAYER_TYPE,
+  NO_ACTIVE_LAYER,
+  WHITELIST_TYPES,
+} from "@app/constants";
 import { filter, includes } from "lodash";
 import { create } from "zustand";
 import { Prototype, Concept, AttributeValue } from "./factorio-api.types";
@@ -13,7 +17,7 @@ type FactorioApi = {
   types: Concept[];
 };
 
-type LayerAttributes = {
+export type LayerAttributes = {
   type: string;
   attributes: Record<string, AttributeValue>;
 };
@@ -74,7 +78,7 @@ function initLayerProperties(id: string) {
 
 function createLayer() {
   return {
-    type: "SpriteParameters",
+    type: DEFAULT_LAYER_TYPE,
     attributes: {},
   };
 }

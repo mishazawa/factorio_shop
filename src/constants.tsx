@@ -24,14 +24,23 @@ export const INT16 = {
   max: 32767,
 };
 
+export const DEFAULT_LAYER_TYPE = "Sprite";
+
 export const WHITELIST_TYPES = [
-  "SpriteParameters",
-  "AnimationParameters",
-  "Animation",
-  "AnimationSheet",
-  "RotatedAnimation",
-  "RotatedSprite",
   "Sprite",
-  "SpriteNWaySheet",
+  "RotatedSprite",
   "SpriteSheet",
+  "Animation",
+  "RotatedAnimation",
+  "AnimationSheet",
+];
+
+export const LUA_PLACEHOLDER_FILENAME = "<path to %%%>";
+
+export const IGNORED_PARAMETERS = [
+  "layers",
+  "stripes",
+  "hr_version",
+  "filename",
+  "filenames",
 ];

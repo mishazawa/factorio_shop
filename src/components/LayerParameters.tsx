@@ -9,6 +9,7 @@ import { Dropdown } from "./parameters/Dropdown";
 
 export function LayerParameters() {
   const types = useFactorioApi((s) => s.editorTypes);
+  const apiTypes = useFactorioApi((s) => s.api?.types!);
   const layerIndex = useFactorioApi((s) => s.activeLayerId);
   const setLayerType = useFactorioApi((s) => s.setLayerType);
 
@@ -41,7 +42,7 @@ export function LayerParameters() {
                 onClick={setLayerType}
               />
             </div>
-            <Parameters current={layerParams.type} options={types} />
+            <Parameters current={layerParams.type} options={apiTypes} />
           </div>
         </div>
       </div>
