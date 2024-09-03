@@ -32,7 +32,7 @@ function LayerItem({ item }: { item: number }) {
 
   function openLayerProps() {
     openLayerPanel(true);
-    useFactorioApi.getState().setActiveLayer(item);
+    useFactorioApi.getState().setActiveLayer(meta.id);
   }
 
   return (

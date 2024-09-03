@@ -3,9 +3,11 @@ import { create } from "zustand";
 import { BBox, Sprite, Xform, xtobb } from "./common";
 import { createReactlessStore } from ".";
 
-import { clamp, cloneDeep } from "lodash";
+import { clamp, cloneDeep, last, uniqueId } from "lodash";
+import { LayerId } from "./api";
 
 export type SpriteObject = {
+  id: string;
   locked: boolean;
   filename: string;
   width: number;
@@ -34,69 +36,6 @@ export const layersState = createReactlessStore<LayersStore>({
   images: [],
   sprites: [],
 });
-
-export function createLayer(
-  value: Sprite,
-  metadata: File,
-  dom: HTMLImageElement
-): [number] {
-  const { sprites } = layersState.update((draft) => {
-    draft.images.push(value);
-    draft.sprites.push(createBlankSprite(metadata, dom));
-  });
-  // prevent to return values < 0
-  return [clamp(sprites.length - 1, 0, Infinity)];
-}
-
-export function copyXform(i: number, xform: Xform) {
-  layersState.update((draft) => {
-    draft.sprites[i].xform = cloneDeep(xform);
-  });
-}
-
-export function copyBBox(i: number, bbox: BBox, abbox: BBox) {
-  layersState.update((draft) => {
-    draft.sprites[i].bbox = cloneDeep(bbox);
-  });
-}
-
-export function applyTransform(i: number, xform: Xform, bbox: BBox) {
-  layersState.update((draft) => {
-    draft.sprites[i].xform = cloneDeep(xform);
-    draft.sprites[i].bbox = cloneDeep(bbox);
-  });
-}
-
-export const removeImage = (index: number) => {
-  layersState.update((draft) => {
-    draft.images.splice(index, 1);
-    draft.sprites.splice(index, 1);
-  });
-};
-
-function createBlankSprite(
-  metadata: File,
-  dom: HTMLImageElement
-): SpriteObject {
-  return {
-    locked: false,
-    filename: metadata.name,
-    width: dom.width,
-    height: dom.height,
-    xform: {
-      position: { x: 0, y: 0 },
-      size: { x: dom.width, y: dom.height }, // maybe change this later
-    },
-    crop: {
-      position: { x: 0, y: 0 },
-      size: { x: dom.width, y: dom.height }, // maybe change this later
-    },
-    bbox: xtobb({
-      position: { x: 0, y: 0 },
-      size: { x: dom.width, y: dom.height }, // maybe change this later
-    }),
-  };
-}
 
 export const useLayersStore = create<
   LayersReactiveStoreData & LayersReactiveStoreFunc
@@ -128,3 +67,70 @@ export const useLayersStore = create<
     );
   },
 }));
+
+export function createLayer(
+  value: Sprite,
+  metadata: File,
+  dom: HTMLImageElement
+): [number, SpriteObject] {
+  const { sprites } = layersState.update((draft) => {
+    draft.images.push(value);
+    draft.sprites.push(createBlankSprite(metadata, dom));
+  });
+  // prevent to return values < 0
+  return [clamp(sprites.length - 1, 0, Infinity), last(sprites)!];
+}
+
+export function copyXform(i: number, xform: Xform) {
+  layersState.update((draft) => {
+    draft.sprites[i].xform = cloneDeep(xform);
+  });
+}
+
+export function copyBBox(i: number, bbox: BBox, abbox: BBox) {
+  layersState.update((draft) => {
+    draft.sprites[i].bbox = cloneDeep(bbox);
+  });
+}
+
+export function applyTransform(i: number, xform: Xform, bbox: BBox) {
+  layersState.update((draft) => {
+    draft.sprites[i].xform = cloneDeep(xform);
+    draft.sprites[i].bbox = cloneDeep(bbox);
+  });
+}
+
+export const removeImage = (index: number): LayerId => {
+  let id: LayerId = -1;
+  layersState.update((draft) => {
+    draft.images.splice(index, 1);
+    const [spr] = draft.sprites.splice(index, 1);
+    id = spr.id;
+  });
+  return id;
+};
+
+function createBlankSprite(
+  metadata: File,
+  dom: HTMLImageElement
+): SpriteObject {
+  return {
+    id: uniqueId("layer-"),
+    locked: false,
+    filename: metadata.name,
+    width: dom.width,
+    height: dom.height,
+    xform: {
+      position: { x: 0, y: 0 },
+      size: { x: dom.width, y: dom.height }, // maybe change this later
+    },
+    crop: {
+      position: { x: 0, y: 0 },
+      size: { x: dom.width, y: dom.height }, // maybe change this later
+    },
+    bbox: xtobb({
+      position: { x: 0, y: 0 },
+      size: { x: dom.width, y: dom.height }, // maybe change this later
+    }),
+  };
+}

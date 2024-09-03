@@ -9,7 +9,7 @@ import { Dropdown } from "./parameters/Dropdown";
 
 export function LayerParameters() {
   const types = useFactorioApi((s) => s.editorTypes);
-  const layerIndex = useFactorioApi((s) => s.activeLayerIndex);
+  const layerIndex = useFactorioApi((s) => s.activeLayerId);
   const setLayerType = useFactorioApi((s) => s.setLayerType);
 
   const layerParams = useFactorioApi((s) => s.layers[layerIndex]);

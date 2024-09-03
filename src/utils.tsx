@@ -54,17 +54,18 @@ export function loadPImage(file: File) {
     processingImage.modified = true;
 
     // add data to realtime storage and track layers in UI storage
-    const [index] = createLayer(processingImage, file, fileImage);
+    const [index, sprite] = createLayer(processingImage, file, fileImage);
     useLayersStore.getState().add(index);
-    useFactorioApi.getState().createLayer(index);
+    useFactorioApi.getState().createLayer(sprite?.id);
   };
 
   reader.readAsDataURL(file);
 }
 
 export function unloadPImage(layerIndex: number) {
-  removeImage(layerIndex);
+  const id = removeImage(layerIndex);
   useLayersStore.getState().remove(layerIndex);
+  useFactorioApi.getState().removeLayer(id);
 }
 
 export function fetchApiDocs() {

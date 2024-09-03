@@ -3,7 +3,6 @@ import { filter, includes } from "lodash";
 import { create } from "zustand";
 import { Prototype, Concept, AttributeValue } from "./factorio-api.types";
 import { produce } from "immer";
-import { insert } from "@app/utils";
 
 type FactorioApi = {
   application: "factorio";
@@ -18,20 +17,21 @@ type LayerAttributes = {
   type: string;
   attributes: Record<string, AttributeValue>;
 };
-
+export type LayerId = string | -1;
 type FactorioApiStore = {
   api: null | FactorioApi;
   editorTypes: Concept[];
   loaded: boolean;
-  activeLayerIndex: number;
-  layers: LayerAttributes[];
+  activeLayerId: LayerId;
+  layers: Record<string, LayerAttributes>;
 };
 
 type FactorioApiStoreFunc = {
-  setActiveLayer: (v: number) => void;
+  setActiveLayer: (id: string) => void;
   setLayerType: (v: string) => void;
   setLayerAttribute: (name: string, value: AttributeValue) => void;
-  createLayer: (index: number) => void;
+  createLayer: (id: string) => void;
+  removeLayer: (id: LayerId) => void;
 };
 
 export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
@@ -39,10 +39,11 @@ export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
     api: null,
     editorTypes: [],
     loaded: false,
-    activeLayerIndex: NO_ACTIVE_LAYER,
-    layers: [],
-    createLayer: (index: number) => set(initLayerProperties(index)),
-    setActiveLayer: (activeLayerIndex: number) => set({ activeLayerIndex }),
+    activeLayerId: NO_ACTIVE_LAYER,
+    layers: {},
+    createLayer: (id: string) => set(initLayerProperties(id)),
+    removeLayer: (id: LayerId) => set(remove(id)),
+    setActiveLayer: (activeLayerId: string) => set({ activeLayerId }),
     setLayerType: (v: string) => set(setLayerType(v)),
     setLayerAttribute: (name: string, value: AttributeValue) => {
       set(setLayerAttribute(name, value));
@@ -58,9 +59,16 @@ export function initFactorioApi(resp: FactorioApi) {
   });
 }
 
-function initLayerProperties(index: number) {
+function remove(id: LayerId) {
   return produce((s: FactorioApiStore) => {
-    s.layers = insert(s.layers, index, createLayer());
+    if (s.activeLayerId === id) s.activeLayerId = NO_ACTIVE_LAYER;
+    delete s.layers[id];
+  });
+}
+
+function initLayerProperties(id: string) {
+  return produce((s: FactorioApiStore) => {
+    s.layers[id] = createLayer();
   });
 }
 
@@ -72,12 +80,12 @@ function createLayer() {
 }
 function setLayerType(value: string) {
   return produce((s: FactorioApiStore) => {
-    s.layers[s.activeLayerIndex].type = value;
+    s.layers[s.activeLayerId].type = value;
   });
 }
 
 function setLayerAttribute(name: string, value: AttributeValue) {
   return produce((s: FactorioApiStore) => {
-    s.layers[s.activeLayerIndex].attributes[name] = value;
+    s.layers[s.activeLayerId].attributes[name] = value;
   });
 }

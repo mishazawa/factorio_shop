@@ -3,6 +3,9 @@ import { Settings } from "./Settings";
 import { differenceWith, filter, head, reverse } from "lodash";
 import { getParentsRecursive } from "./utils";
 import { Property, ComplexType, Concept } from "@store/factorio-api.types";
+import { useFactorioApi } from "@store/api";
+import { If } from "../UIKit";
+import { DEBUG } from "@app/constants";
 
 export type ParameterProps = {
   property: Property;
@@ -23,11 +26,21 @@ export function Parameters({
 }) {
   const selected = head(filter(options, (n) => n.name === current));
 
-  if (!selected) return null;
+  if (!selected) {
+    return (
+      <If v={DEBUG}>
+        <DebugStore />
+      </If>
+    );
+  }
+
   const parents = reverse(getParentsRecursive(options, selected.parent));
 
   return (
     <>
+      <If v={DEBUG}>
+        <DebugStore />
+      </If>
       {parents.map((p, i) => (
         <ParameterInputList key={i} params={p} />
       ))}
@@ -63,4 +76,10 @@ export function ParameterInputList({ params = [] }: { params?: Property[] }) {
       ))}
     </>
   );
+}
+
+export function DebugStore() {
+  const _ = useFactorioApi((s) => s.layers);
+  console.log(_);
+  return null;
 }

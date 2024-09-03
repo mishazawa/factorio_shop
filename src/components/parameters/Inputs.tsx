@@ -38,8 +38,8 @@ type PNumberProps = {
 function useStoreAttribute<T>({
   name,
 }: Property): [T, (v: AttributeValue) => void] {
-  const idx = useFactorioApi((s) => s.activeLayerIndex);
-  const value = useFactorioApi((s) => s.layers[idx].attributes[name]);
+  const id = useFactorioApi((s) => s.activeLayerId);
+  const value = useFactorioApi((s) => s.layers[id].attributes[name]);
   const setState = useFactorioApi((s) => s.setLayerAttribute);
   const fn = useCallback((v: any) => setState(name, v), [name, setState]);
   return [value as T, fn];
