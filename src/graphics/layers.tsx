@@ -3,9 +3,9 @@ import { frameState, resetFrame } from "@store/frame";
 import { layersState, useLayersStore } from "@store/layers";
 
 import { image, outline } from "./utils";
-import { checkAABB } from "./raycast";
-import { createSelection } from "@store/selection";
 
+import { createSelection } from "@store/selection";
+import { aabb } from "./renderer";
 export function drawLayers() {
   const store = layersState.read();
   const layers = useLayersStore.getState().layers;
@@ -37,7 +37,7 @@ export function onLayerHover() {
 
   for (let i = 0; i < layers.length; i++) {
     const lay = layers[i];
-    if (checkAABB(sprites[lay].bbox)) {
+    if (aabb(sprites[lay].bbox)) {
       if (DEBUG) {
         const { active } = frameState.read();
 

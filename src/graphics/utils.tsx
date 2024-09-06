@@ -11,18 +11,13 @@ import {
 } from "@app/constants";
 import { useFactorioApi } from "@store/api";
 import { createLayer, useLayersStore, removeImage } from "@store/layers";
+import { renderer as R } from "./renderer";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;
   drawingContext: CanvasRenderingContext2D;
   modified: boolean;
 };
-
-let _PROC: p5 = null!;
-
-export function initUtils(p: p5) {
-  _PROC = p;
-}
 
 export function outline(
   x: number,
@@ -32,38 +27,38 @@ export function outline(
   stroke: number = OUTLINE_WIDTH,
   color: [number, number, number] = OUTLINE_COLOR
 ) {
-  _PROC.push();
-  _PROC.noFill();
-  _PROC.strokeWeight(stroke);
-  _PROC.stroke(color);
-  _PROC.rect(x, y, w, h);
-  _PROC.pop();
+  R.push();
+  R.noFill();
+  R.strokeWeight(stroke);
+  R.stroke(color);
+  R.rect(x, y, w, h);
+  R.pop();
 }
 
 export function grid(dim: number = TILE_DIMENSIONS) {
-  _PROC.push();
-  _PROC.stroke(...GRID_COLOR);
-  _PROC.strokeWeight(GRID_WIDTH);
+  R.push();
+  R.stroke(...GRID_COLOR);
+  R.strokeWeight(GRID_WIDTH);
 
   // vertical lines
   let cursor = dim;
-  while (cursor < _PROC.height) {
-    _PROC.line(0, cursor, _PROC.width, cursor);
+  while (cursor < R.height) {
+    R.line(0, cursor, R.width, cursor);
     cursor += dim;
   }
 
   // horizontal lines
   cursor = dim;
-  while (cursor < _PROC.width) {
-    _PROC.line(cursor, 0, cursor, _PROC.height);
+  while (cursor < R.width) {
+    R.line(cursor, 0, cursor, R.height);
     cursor += dim;
   }
 
-  _PROC.pop();
+  R.pop();
 }
 
 export function image(img: p5.Image, x: number, y: number, ...args: number[]) {
-  _PROC.image(img, x, y, ...args);
+  R.image(img, x, y, ...args);
 }
 
 export function snapToGrid(xform: Xform) {
@@ -80,8 +75,8 @@ export function translate(xform: Xform) {
   return {
     ...xform,
     position: {
-      x: _PROC.mouseX + (xform.position.x - _PROC.pmouseX),
-      y: _PROC.mouseY + (xform.position.y - _PROC.pmouseY),
+      x: R.mouseX + (xform.position.x - R.pmouseX),
+      y: R.mouseY + (xform.position.y - R.pmouseY),
     },
   };
 }

@@ -1,11 +1,10 @@
 import p5 from "p5";
 
-import { grid as drawGrid, initUtils, onWindowResize, sequence } from "./utils";
-import { initRaycast, isKeyPressed, isMouseInteraction } from "./raycast";
+import { grid as drawGrid, onWindowResize, sequence } from "./utils";
+
 import {
   cropImage,
   drawSelection,
-  initSelection,
   onCropPress,
   onCropRelease,
   onSelectionClick,
@@ -17,7 +16,8 @@ import { TRANSFORM, BACKGROUND_COLOR, CROP, KBD_ENTER } from "@app/constants";
 
 import { frameState } from "@store/frame";
 import { ToolMode, toolsState } from "@store/tools";
-import { cloneDeep } from "lodash";
+import { clamp, cloneDeep } from "lodash";
+import { init, isKeyPressed, isMouseInteraction } from "./renderer";
 
 export function setup(p: p5) {
   return () => {
@@ -25,9 +25,7 @@ export function setup(p: p5) {
     onWindowResize(p)();
     p.rectMode(p.CORNER);
     // important calls
-    initUtils(p);
-    initRaycast(p);
-    initSelection(p);
+    init(p);
   };
 }
 
@@ -138,4 +136,16 @@ function isEnteredState(prev: boolean, curr: boolean) {
 }
 function isLeaveState(prev: boolean, curr: boolean) {
   return !curr && curr !== prev;
+}
+
+export function onMouseScroll({ delta }: { delta: number }) {
+  frameState.update((fs) => {
+    if (delta > 0) {
+      fs.zoom.level = clamp(fs.zoom.level - 1, 1, Infinity);
+      console.log("▲ out");
+    } else {
+      console.log("▼ in");
+      fs.zoom.level = clamp(fs.zoom.level + 1, 1, Infinity);
+    }
+  });
 }

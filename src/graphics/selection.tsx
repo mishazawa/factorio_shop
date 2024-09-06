@@ -1,4 +1,3 @@
-import p5 from "p5";
 import {
   assignOnlyPositiveValue,
   outline,
@@ -6,7 +5,6 @@ import {
   translate,
 } from "./utils";
 
-import { checkAABB } from "./raycast";
 import { NO_ACTIVE_LAYER, DEBUG } from "@app/constants";
 import { BBox, Vec4, Xform } from "@store/common";
 import { frameState } from "@store/frame";
@@ -17,15 +15,10 @@ import {
   updateSelectionBBox,
 } from "@store/selection";
 import { values } from "lodash";
-
-let _PROC: p5 = null!;
+import { aabb, renderer as R } from "./renderer";
 
 const DEBUG_LINE = 1;
 const DEBUG_GREEN: [number, number, number] = [0, 255, 0];
-
-export function initSelection(p: p5) {
-  _PROC = p;
-}
 
 export function drawSelection() {
   if (frameState.read().active === NO_ACTIVE_LAYER) return;
@@ -192,40 +185,34 @@ function getManipulatorIntersection(
   bounds: Record<SelectBoxHandle, BBox>
 ): SelectBoxHandle | null {
   for (const handle in bounds) {
-    if (checkAABB(bounds[handle as SelectBoxHandle]))
+    if (aabb(bounds[handle as SelectBoxHandle]))
       return handle as SelectBoxHandle;
   }
   return null;
 }
 
 function resizeTop(box: Xform) {
-  assignOnlyPositiveValue(
-    box.size.y + box.position.y - _PROC.mouseY,
-    (result) => {
-      box.size.y = result;
-      box.position.y = box.position.y - (box.position.y - _PROC.mouseY);
-    }
-  );
+  assignOnlyPositiveValue(box.size.y + box.position.y - R.mouseY, (result) => {
+    box.size.y = result;
+    box.position.y = box.position.y - (box.position.y - R.mouseY);
+  });
 }
 
 function resizeLeft(box: Xform) {
-  assignOnlyPositiveValue(
-    box.size.x + box.position.x - _PROC.mouseX,
-    (result) => {
-      box.size.x = result;
-      box.position.x = box.position.x - (box.position.x - _PROC.mouseX);
-    }
-  );
+  assignOnlyPositiveValue(box.size.x + box.position.x - R.mouseX, (result) => {
+    box.size.x = result;
+    box.position.x = box.position.x - (box.position.x - R.mouseX);
+  });
 }
 
 function resizeRight(box: Xform) {
-  assignOnlyPositiveValue(_PROC.mouseX - box.position.x, (result) => {
+  assignOnlyPositiveValue(R.mouseX - box.position.x, (result) => {
     box.size.x = result;
   });
 }
 
 function resizeBottom(box: Xform) {
-  assignOnlyPositiveValue(_PROC.mouseY - box.position.y, (result) => {
+  assignOnlyPositiveValue(R.mouseY - box.position.y, (result) => {
     box.size.y = result;
   });
 }

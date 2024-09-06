@@ -28,6 +28,9 @@ export type FrameState = {
     prev: KeyboardState;
     curr: KeyboardState;
   };
+  zoom: {
+    level: number;
+  };
 };
 
 export function resetFrame() {
@@ -57,6 +60,9 @@ export function resetFrame() {
       curr: {
         13: false,
       },
+    },
+    zoom: {
+      level: 1,
     },
   };
 }
