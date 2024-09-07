@@ -12,6 +12,7 @@ import {
 import { useFactorioApi } from "@store/api";
 import { createLayer, useLayersStore, removeImage } from "@store/layers";
 import { renderer as R } from "./renderer";
+import { frameState } from "@store/frame";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;
@@ -36,21 +37,27 @@ export function outline(
 }
 
 export function grid(dim: number = TILE_DIMENSIONS) {
+  const { hideGrid, value: zoom } = frameState.read().zoom;
+  if (hideGrid) return;
+
+  const widthZoom = R.width * (R.width / (R.width * zoom));
+  const heightZoom = R.height * (R.height / (R.height * zoom));
+
   R.push();
   R.stroke(...GRID_COLOR);
   R.strokeWeight(GRID_WIDTH);
 
   // vertical lines
   let cursor = dim;
-  while (cursor < R.height) {
-    R.line(0, cursor, R.width, cursor);
+  while (cursor < heightZoom) {
+    R.line(0, cursor, widthZoom, cursor);
     cursor += dim;
   }
 
   // horizontal lines
   cursor = dim;
-  while (cursor < R.width) {
-    R.line(cursor, 0, cursor, R.height);
+  while (cursor < widthZoom) {
+    R.line(cursor, 0, cursor, heightZoom);
     cursor += dim;
   }
 
@@ -145,4 +152,11 @@ export function unloadPImage(layerIndex: number) {
   const id = removeImage(layerIndex);
   useLayersStore.getState().remove(layerIndex);
   useFactorioApi.getState().removeLayer(id);
+}
+
+export function DEBUG_box() {
+  R.push();
+  R.fill(123, 231, 11);
+  R.rect(50, 50, 100, 100);
+  R.pop();
 }

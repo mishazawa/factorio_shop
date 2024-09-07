@@ -1,6 +1,12 @@
-import { NO_ACTIVE_LAYER } from "@app/constants";
+import {
+  NO_ACTIVE_LAYER,
+  ZOOM_HIDE_GRID,
+  ZOOM_MIN_MAX_ABS,
+  ZOOM_SENSITIVITY,
+} from "@app/constants";
 import { createReactlessStore } from ".";
 import { SelectBoxHandle } from "./selection";
+import { clamp, cloneDeep } from "lodash";
 
 type MouseState = {
   left: boolean;
@@ -30,6 +36,8 @@ export type FrameState = {
   };
   zoom: {
     level: number;
+    value: number;
+    hideGrid: boolean;
   };
 };
 
@@ -63,8 +71,28 @@ export function resetFrame() {
     },
     zoom: {
       level: 1,
+      value: 1,
+      hideGrid: false,
     },
   };
 }
 
 export const frameState = createReactlessStore<FrameState>(resetFrame());
+
+export function zoom(direction: number) {
+  frameState.update((fs) => {
+    fs.zoom.level = clamp(fs.zoom.level + direction, -50, 10);
+    fs.zoom.value = clamp(
+      1 + fs.zoom.level * ZOOM_SENSITIVITY,
+      ...ZOOM_MIN_MAX_ABS
+    );
+    fs.zoom.hideGrid = fs.zoom.level >= ZOOM_HIDE_GRID;
+  });
+}
+
+export function expireFrameContols() {
+  frameState.update((fs) => {
+    fs.mouse.prev = cloneDeep(fs.mouse.curr);
+    fs.keyboard.prev = cloneDeep(fs.keyboard.curr);
+  });
+}

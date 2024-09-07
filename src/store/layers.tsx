@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { BBox, Sprite, Xform, xtobb } from "./common";
 import { createReactlessStore } from ".";
 
-import { clamp, cloneDeep, last, uniqueId } from "lodash";
+import { clamp, cloneDeep, has, last, set, uniqueId } from "lodash";
 import { LayerId } from "./api";
 
 export type SpriteObject = {
@@ -95,8 +95,10 @@ export function copyBBox(i: number, bbox: BBox, abbox: BBox) {
 
 export function applyTransform(i: number, xform: Xform, bbox: BBox) {
   layersState.update((draft) => {
-    draft.sprites[i].xform = cloneDeep(xform);
-    draft.sprites[i].bbox = cloneDeep(bbox);
+    if (has(draft, ["sprites", i])) {
+      set(draft, ["sprites", i, "xform"], cloneDeep(xform));
+      set(draft, ["sprites", i, "bbox"], cloneDeep(bbox));
+    }
   });
 }
 

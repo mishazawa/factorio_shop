@@ -12,7 +12,10 @@ export const NO_ACTIVE_LAYER = -1;
 export const TRANSFORM = "TRANSFORM";
 export const CROP = "CROP";
 export const KBD_ENTER = 13;
-
+export const ZOOM_MIN_MAX_ABS: [number, number] = [0.1, 10]; // scaled values
+export const ZOOM_DIRECTION = -1;
+export const ZOOM_SENSITIVITY = 0.1 * ZOOM_DIRECTION;
+export const ZOOM_HIDE_GRID = 8;
 export const UINT8 = {
   int: true,
   min: 0,

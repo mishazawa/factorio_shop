@@ -1,6 +1,6 @@
 import p5 from "p5";
 
-import { grid as drawGrid, onWindowResize, sequence } from "./utils";
+import { DEBUG_box, grid as drawGrid, onWindowResize, sequence } from "./utils";
 
 import {
   cropImage,
@@ -11,12 +11,12 @@ import {
   onSelectionPress,
   onSelectionRelease,
 } from "./selection";
+
 import { drawLayers, onLayerClick, onLayerHover, onLayerPress } from "./layers";
 import { TRANSFORM, BACKGROUND_COLOR, CROP, KBD_ENTER } from "@app/constants";
 
-import { frameState } from "@store/frame";
+import { expireFrameContols, frameState, zoom } from "@store/frame";
 import { ToolMode, toolsState } from "@store/tools";
-import { clamp, cloneDeep } from "lodash";
 import { init, isKeyPressed, isMouseInteraction } from "./renderer";
 
 export function setup(p: p5) {
@@ -53,6 +53,7 @@ export function draw(p: p5) {
       onCropApply(p.ENTER);
     });
 
+    DEBUG_box();
     afterFrame();
   };
 }
@@ -111,6 +112,7 @@ function onLeftMouseRelease() {
 
 function beforeFrame(p: p5) {
   p.background(BACKGROUND_COLOR);
+  p.scale(frameState.read().zoom.value);
 
   frameState.update((fs) => {
     fs.mouse.curr.left = isMouseInteraction(p.LEFT);
@@ -119,11 +121,9 @@ function beforeFrame(p: p5) {
     fs.keyboard.curr[KBD_ENTER] = isKeyPressed(p.ENTER);
   });
 }
+
 function afterFrame() {
-  frameState.update((fs) => {
-    fs.mouse.prev = cloneDeep(fs.mouse.curr);
-    fs.keyboard.prev = cloneDeep(fs.keyboard.curr);
-  });
+  expireFrameContols();
 }
 
 function isMouseClick(btn: p5.LEFT | p5.RIGHT) {
@@ -139,13 +139,5 @@ function isLeaveState(prev: boolean, curr: boolean) {
 }
 
 export function onMouseScroll({ delta }: { delta: number }) {
-  frameState.update((fs) => {
-    if (delta > 0) {
-      fs.zoom.level = clamp(fs.zoom.level - 1, 1, Infinity);
-      console.log("▲ out");
-    } else {
-      console.log("▼ in");
-      fs.zoom.level = clamp(fs.zoom.level + 1, 1, Infinity);
-    }
-  });
+  zoom(Math.sign(delta));
 }
