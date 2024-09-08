@@ -1,6 +1,6 @@
 import p5 from "p5";
 
-import { Xform } from "@store/common";
+import { Coords, Xform } from "@store/common";
 import {
   GRID_COLOR,
   GRID_WIDTH,
@@ -11,14 +11,25 @@ import {
 } from "@app/constants";
 import { useFactorioApi } from "@store/api";
 import { createLayer, useLayersStore, removeImage } from "@store/layers";
-import { renderer as R } from "./renderer";
+import { getMouse, renderer as R } from "./renderer";
 import { frameState } from "@store/frame";
+import { flow, round } from "lodash";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;
   drawingContext: CanvasRenderingContext2D;
   modified: boolean;
 };
+
+export function drawOrigin() {
+  R.push();
+  R.strokeWeight(1);
+  R.stroke([255, 0, 0]);
+  R.line(0, 0, TILE_DIMENSIONS, 0);
+  R.stroke([0, 0, 255]);
+  R.line(0, 0, 0, TILE_DIMENSIONS);
+  R.pop();
+}
 
 export function outline(
   x: number,
@@ -160,3 +171,44 @@ export function DEBUG_box() {
   R.rect(50, 50, 100, 100);
   R.pop();
 }
+
+export function addCoords(a: Coords, b: Coords) {
+  return {
+    x: a.x + b.x,
+    y: a.y + b.y,
+  };
+}
+
+export function subCoords(a: Coords, b: Coords) {
+  return {
+    x: a.x - b.x,
+    y: a.y - b.y,
+  };
+}
+
+export function scaleCoords(a: Coords, b: Coords) {
+  return {
+    x: a.x * b.x,
+    y: a.y * b.y,
+  };
+}
+
+export function roundCoords(a: Coords) {
+  return {
+    x: round(a.x),
+    y: round(a.y),
+  };
+}
+
+export function getZoomRatio() {
+  const { value: zoom } = frameState.read().zoom;
+  return {
+    x: R.width / (R.width * zoom),
+    y: R.height / (R.height * zoom),
+  };
+}
+
+export const getScaledMouseCoords = flow(
+  () => [getMouse(), getZoomRatio()], // get values of mouse and zoom
+  ([a, b]) => scaleCoords(a, b) // scale to zoom level
+);
