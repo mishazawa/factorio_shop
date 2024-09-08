@@ -12,7 +12,7 @@ import {
 import { useFactorioApi } from "@store/api";
 import { createLayer, useLayersStore, removeImage } from "@store/layers";
 import { getMouse, renderer as R } from "./renderer";
-import { frameState } from "@store/frame";
+import { frameState, getOrigin } from "@store/frame";
 import { flow, round } from "lodash";
 
 type PImage = p5.Image & {
@@ -212,3 +212,9 @@ export const getScaledMouseCoords = flow(
   () => [getMouse(), getZoomRatio()], // get values of mouse and zoom
   ([a, b]) => scaleCoords(a, b) // scale to zoom level
 );
+
+export function toWorldSpace(coords: Coords) {
+  const zoomRatio = getZoomRatio();
+  const orig = getOrigin();
+  return scaleCoords(zoomRatio, addCoords(coords, orig));
+}

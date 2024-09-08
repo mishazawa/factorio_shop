@@ -1,6 +1,7 @@
 import { BBox, Coords } from "@store/common";
 import { assignIn } from "lodash";
 import p5 from "p5";
+import { toWorldSpace } from "./utils";
 
 type Renderer = {
   processing: p5;
@@ -17,14 +18,9 @@ export function init(p: p5) {
 }
 
 export function aabb({ ax, ay, bx, by }: BBox) {
-  return (
-    renderer.mouseX >= ax &&
-    renderer.mouseX <= bx &&
-    renderer.mouseY >= ay &&
-    renderer.mouseY <= by
-  );
+  const mouse = toWorldSpace(getMouse());
+  return mouse.x >= ax && mouse.x <= bx && mouse.y >= ay && mouse.y <= by;
 }
-
 export function isMouseInteraction(btn: p5.LEFT | p5.RIGHT | p5.CENTER) {
   return renderer.mouseIsPressed && renderer.mouseButton === btn;
 }

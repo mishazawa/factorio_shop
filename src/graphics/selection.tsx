@@ -15,7 +15,7 @@ import {
   updateSelectionBBox,
 } from "@store/selection";
 import { values } from "lodash";
-import { aabb, renderer as R } from "./renderer";
+import { renderer as R, aabb } from "./renderer";
 
 const DEBUG_LINE = 1;
 const DEBUG_GREEN: [number, number, number] = [0, 255, 0];
