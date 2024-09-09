@@ -90,11 +90,13 @@ export function snapToGrid(xform: Xform) {
 }
 
 export function translate(xform: Xform) {
+  const { x, y } = toWorldSpace({ x: R.mouseX, y: R.mouseY });
+  const { x: px, y: py } = toWorldSpace({ x: R.pmouseX, y: R.pmouseY });
   return {
     ...xform,
     position: {
-      x: R.mouseX + (xform.position.x - R.pmouseX),
-      y: R.mouseY + (xform.position.y - R.pmouseY),
+      x: x + (xform.position.x - px),
+      y: y + (xform.position.y - py),
     },
   };
 }
