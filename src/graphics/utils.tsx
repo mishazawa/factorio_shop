@@ -48,27 +48,30 @@ export function outline(
 }
 
 export function grid(dim: number = TILE_DIMENSIONS) {
-  const { hideGrid, value: zoom } = frameState.read().zoom;
+  const { hideGrid } = frameState.read().zoom;
   if (hideGrid) return;
+  const orig = getOrigin();
 
-  const widthZoom = R.width * (R.width / (R.width * zoom));
-  const heightZoom = R.height * (R.height / (R.height * zoom));
+  const zr = getZoomRatio();
+  const widthZoom = R.width * zr.x;
+  const heightZoom = R.height * zr.y - orig.y;
 
   R.push();
   R.stroke(...GRID_COLOR);
   R.strokeWeight(GRID_WIDTH);
 
   // vertical lines
-  let cursor = dim;
-  while (cursor < heightZoom) {
-    R.line(0, cursor, widthZoom, cursor);
+  let cursor = Math.round(orig.y / TILE_DIMENSIONS) * TILE_DIMENSIONS;
+  while (cursor < heightZoom - orig.y) {
+    R.line(orig.x, cursor, widthZoom, cursor);
     cursor += dim;
   }
 
   // horizontal lines
-  cursor = dim;
-  while (cursor < widthZoom) {
-    R.line(cursor, 0, cursor, heightZoom);
+  cursor = Math.round(orig.x / TILE_DIMENSIONS) * TILE_DIMENSIONS;
+
+  while (cursor < widthZoom - orig.x) {
+    R.line(cursor, orig.y, cursor, heightZoom);
     cursor += dim;
   }
 

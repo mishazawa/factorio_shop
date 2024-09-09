@@ -49,12 +49,12 @@ export function setup(p: p5) {
 export function draw(p: p5) {
   return () => {
     beforeFrame(p);
-    drawOrigin();
 
     onMouseClick(onMiddleMouseClick, p.CENTER);
     onMousePress(onMiddleMousePress, p.CENTER);
 
     drawLayers();
+    drawGrid();
 
     withMode(TRANSFORM, () => {
       onLayerHover();
@@ -74,8 +74,9 @@ export function draw(p: p5) {
     });
 
     DEBUG_box();
+    drawOrigin();
+
     afterFrame(p);
-    drawGrid();
   };
 }
 
