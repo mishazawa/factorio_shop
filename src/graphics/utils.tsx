@@ -51,10 +51,10 @@ export function grid(dim: number = TILE_DIMENSIONS) {
   const { hideGrid } = frameState.read().zoom;
   if (hideGrid) return;
   const orig = getOrigin();
-
   const zr = getZoomRatio();
-  const widthZoom = R.width * zr.x;
-  const heightZoom = R.height * zr.y - orig.y;
+
+  const widthZoom = R.width * zr.x + orig.x;
+  const heightZoom = R.height * zr.y + orig.y;
 
   R.push();
   R.stroke(...GRID_COLOR);
@@ -62,7 +62,7 @@ export function grid(dim: number = TILE_DIMENSIONS) {
 
   // vertical lines
   let cursor = Math.round(orig.y / TILE_DIMENSIONS) * TILE_DIMENSIONS;
-  while (cursor < heightZoom - orig.y) {
+  while (cursor < heightZoom) {
     R.line(orig.x, cursor, widthZoom, cursor);
     cursor += dim;
   }
@@ -70,7 +70,7 @@ export function grid(dim: number = TILE_DIMENSIONS) {
   // horizontal lines
   cursor = Math.round(orig.x / TILE_DIMENSIONS) * TILE_DIMENSIONS;
 
-  while (cursor < widthZoom - orig.x) {
+  while (cursor < widthZoom) {
     R.line(cursor, orig.y, cursor, heightZoom);
     cursor += dim;
   }
@@ -170,13 +170,6 @@ export function unloadPImage(layerIndex: number) {
   useFactorioApi.getState().removeLayer(id);
 }
 
-export function DEBUG_box() {
-  R.push();
-  R.fill(123, 231, 11);
-  R.rect(50, 50, 100, 100);
-  R.pop();
-}
-
 export function addCoords(a: Coords, b: Coords) {
   return {
     x: a.x + b.x,
@@ -221,5 +214,5 @@ export const getScaledMouseCoords = flow(
 export function toWorldSpace(coords: Coords) {
   const zoomRatio = getZoomRatio();
   const orig = getOrigin();
-  return scaleCoords(zoomRatio, addCoords(coords, orig));
+  return addCoords(scaleCoords(zoomRatio, coords), orig);
 }

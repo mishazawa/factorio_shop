@@ -2,6 +2,7 @@ import {
   assignOnlyPositiveValue,
   outline,
   snapToGrid,
+  toWorldSpace,
   translate,
 } from "./utils";
 
@@ -15,7 +16,7 @@ import {
   updateSelectionBBox,
 } from "@store/selection";
 import { values } from "lodash";
-import { renderer as R, aabb } from "./renderer";
+import { aabb, getMouse } from "./renderer";
 
 const DEBUG_LINE = 1;
 const DEBUG_GREEN: [number, number, number] = [0, 255, 0];
@@ -41,16 +42,17 @@ export function onSelectionClick(): boolean {
   const { active, selection } = frameState.read();
   if (active === NO_ACTIVE_LAYER) return result;
 
-  if (!selection.drag) {
+  if (!selection.resize) {
     frameState.update((fs) => {
       fs.selection.handle = getManipulatorIntersection(
         selectionState.read().collisions
       );
 
-      fs.selection.drag = !!fs.selection.handle && fs.selection.handle !== "C";
+      fs.selection.resize =
+        !!fs.selection.handle && fs.selection.handle !== "C";
       fs.selection.translate = fs.selection.handle === "C";
 
-      result = fs.selection.drag || fs.selection.translate;
+      result = fs.selection.resize || fs.selection.translate;
     });
   }
 
@@ -70,7 +72,7 @@ export function onCropPress() {
     translateSelection();
   }
 
-  if (selection.drag && selection.handle) {
+  if (selection.resize && selection.handle) {
     extendSelection(selection.handle);
   }
 }
@@ -79,12 +81,12 @@ export function onCropRelease() {
   const { selection, active } = frameState.read();
   if (active === NO_ACTIVE_LAYER) return;
 
-  if (selection.drag || selection.translate) {
+  if (selection.resize || selection.translate) {
     updateSelectionBBox();
   }
 
   frameState.update((fs) => {
-    fs.selection.drag = false;
+    fs.selection.resize = false;
     fs.selection.handle = null;
   });
 }
@@ -99,7 +101,7 @@ export function onSelectionPress() {
     copyXform(active, xform);
   }
 
-  if (selection.drag && selection.handle) {
+  if (selection.resize && selection.handle) {
     const { xform } = selectionState.read();
 
     extendSelection(selection.handle);
@@ -111,7 +113,7 @@ export function onSelectionRelease() {
   const { selection, active } = frameState.read();
   if (active === NO_ACTIVE_LAYER) return;
 
-  if (selection.drag) {
+  if (selection.resize) {
     updateSelectionBBox();
 
     const { xform, bbox } = selectionState.read();
@@ -126,7 +128,7 @@ export function onSelectionRelease() {
     applyTransform(active, xform, bbox);
   }
   frameState.update((fs) => {
-    fs.selection.drag = false;
+    fs.selection.resize = false;
     fs.selection.handle = null;
   });
 }
@@ -192,27 +194,33 @@ function getManipulatorIntersection(
 }
 
 function resizeTop(box: Xform) {
-  assignOnlyPositiveValue(box.size.y + box.position.y - R.mouseY, (result) => {
+  const { y } = toWorldSpace(getMouse());
+
+  assignOnlyPositiveValue(box.size.y + box.position.y - y, (result) => {
     box.size.y = result;
-    box.position.y = box.position.y - (box.position.y - R.mouseY);
+    box.position.y = box.position.y - (box.position.y - y);
   });
 }
 
 function resizeLeft(box: Xform) {
-  assignOnlyPositiveValue(box.size.x + box.position.x - R.mouseX, (result) => {
+  const { x } = toWorldSpace(getMouse());
+
+  assignOnlyPositiveValue(box.size.x + box.position.x - x, (result) => {
     box.size.x = result;
-    box.position.x = box.position.x - (box.position.x - R.mouseX);
+    box.position.x = box.position.x - (box.position.x - x);
   });
 }
 
 function resizeRight(box: Xform) {
-  assignOnlyPositiveValue(R.mouseX - box.position.x, (result) => {
+  const { x } = toWorldSpace(getMouse());
+  assignOnlyPositiveValue(x - box.position.x, (result) => {
     box.size.x = result;
   });
 }
 
 function resizeBottom(box: Xform) {
-  assignOnlyPositiveValue(R.mouseY - box.position.y, (result) => {
+  const { y } = toWorldSpace(getMouse());
+  assignOnlyPositiveValue(y - box.position.y, (result) => {
     box.size.y = result;
   });
 }

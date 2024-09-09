@@ -23,7 +23,7 @@ export type FrameState = {
   hover: number;
   active: number;
   selection: {
-    drag: boolean;
+    resize: boolean;
     translate: boolean;
     locked: boolean;
     handle: null | SelectBoxHandle;
@@ -49,7 +49,7 @@ export function resetFrame() {
     hover: NO_ACTIVE_LAYER,
     active: NO_ACTIVE_LAYER,
     selection: {
-      drag: false,
+      resize: false,
       handle: null,
       translate: false,
       locked: false,

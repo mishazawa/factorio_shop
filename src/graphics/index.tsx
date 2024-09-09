@@ -2,7 +2,6 @@ import p5 from "p5";
 
 import {
   addCoords,
-  DEBUG_box,
   grid as drawGrid,
   drawOrigin,
   getScaledMouseCoords,
@@ -73,9 +72,7 @@ export function draw(p: p5) {
       onCropApply(p.ENTER);
     });
 
-    DEBUG_box();
     drawOrigin();
-
     afterFrame(p);
   };
 }
