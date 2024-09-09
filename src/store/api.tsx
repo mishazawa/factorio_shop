@@ -3,7 +3,7 @@ import {
   NO_ACTIVE_LAYER,
   WHITELIST_TYPES,
 } from "@app/constants";
-import { filter, includes } from "lodash";
+import { filter, includes } from "lodash/fp";
 import { create } from "zustand";
 import { Prototype, Concept, AttributeValue } from "./factorio-api.types";
 import { produce } from "immer";
@@ -58,7 +58,7 @@ export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
 export function initFactorioApi(resp: FactorioApi) {
   useFactorioApi.setState({
     api: resp,
-    editorTypes: filter(resp.types, (o) => includes(WHITELIST_TYPES, o.name)),
+    editorTypes: filter((o) => includes(o.name, WHITELIST_TYPES), resp.types),
     loaded: true,
   });
 }

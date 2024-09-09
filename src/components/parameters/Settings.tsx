@@ -1,4 +1,4 @@
-import { isString } from "lodash";
+import { isString } from "lodash/fp";
 import { ParameterProps } from ".";
 import { decomposeComplexType, isBuiltin } from "./utils";
 import { ErrorProperty } from "./Error";

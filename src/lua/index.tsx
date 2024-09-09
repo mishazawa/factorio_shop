@@ -2,7 +2,17 @@ import { LUA_PLACEHOLDER_FILENAME } from "@app/constants";
 import { LayerAttributes } from "@store/api";
 import { AttributeValue } from "@store/factorio-api.types";
 import { SpriteObject } from "@store/layers";
-import { chain, isArray, isString, last, repeat } from "lodash";
+import {
+  flow,
+  isArray,
+  isString,
+  join,
+  last,
+  map,
+  repeat,
+  thru,
+  toPairs,
+} from "lodash/fp";
 
 export function generate(
   layers: SpriteObject[],
@@ -15,29 +25,28 @@ function processLayer(
   layers: SpriteObject[],
   parameters: Record<string, LayerAttributes>
 ) {
-  return chain(layers)
-    .map((s) => processLayerAttributes(parameters[s.id].attributes, s))
-    .join("\n")
-    .value();
+  return flow(
+    map((s: SpriteObject) =>
+      processLayerAttributes<Record<string, AttributeValue>>(
+        parameters[s.id].attributes,
+        s
+      )
+    ),
+    join("\n")
+  )(layers);
 }
 
-function processLayerAttributes(
-  attributes: Record<string, AttributeValue>,
-  sprite: SpriteObject
-) {
-  return chain(attributes)
-    .thru((v) => addIgnoredAttributes(v, sprite))
-    .toPairs()
-    .map(([k, v]) => keyValue(k, v))
-    .join("\n")
-    .thru(wrapTable)
-    .value();
+function processLayerAttributes<T>(attributes: T, sprite: SpriteObject) {
+  return flow(
+    thru((v) => addIgnoredAttributes(v, sprite)),
+    toPairs,
+    map(([k, v]) => keyValue(k, v)),
+    join("\n"),
+    thru(wrapTable)
+  )(attributes);
 }
 
-function addIgnoredAttributes(
-  v: Record<string, AttributeValue>,
-  s: SpriteObject
-) {
+function addIgnoredAttributes<T>(v: T, s: SpriteObject) {
   return {
     filename: LUA_PLACEHOLDER_FILENAME.replace("%%%", s.filename),
     ...v,
@@ -65,15 +74,12 @@ function wrapString(v: AttributeValue) {
 }
 
 function wrapUndefinedArrayElement(v: string | number | undefined) {
-  console.log("aaa", v);
   if (!v) return 0;
   return v;
 }
 
 function wrapArray(v: AttributeValue) {
   if (isArray(v)) {
-    console.log("222", v);
-
     return wrapTable(
       [...v].map((v) => wrapString(wrapUndefinedArrayElement(v))).join(", ")
     );
@@ -82,7 +88,7 @@ function wrapArray(v: AttributeValue) {
 }
 
 function addTabs(s: string, n: number = 2) {
-  return `${repeat("  ", n)}${s}`;
+  return `${repeat(n, "  ")}${s}`;
 }
 
 const OPEN_TABLE = "{";

@@ -13,7 +13,7 @@ import { useFactorioApi } from "@store/api";
 import { createLayer, useLayersStore, removeImage } from "@store/layers";
 import { getMouse, renderer as R } from "./renderer";
 import { frameState, getOrigin } from "@store/frame";
-import { flow, round } from "lodash";
+import { flow, round } from "lodash/fp";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;

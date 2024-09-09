@@ -6,7 +6,7 @@ import {
 } from "@app/constants";
 import { createReactlessStore } from ".";
 import { SelectBoxHandle } from "./selection";
-import { clamp, cloneDeep, throttle } from "lodash";
+import { clamp, cloneDeep, throttle } from "lodash/fp";
 import { Coords } from "./common";
 
 type MouseState = {
@@ -85,7 +85,7 @@ export function resetFrame() {
 
 export const frameState = createReactlessStore<FrameState>(resetFrame());
 
-const throttledScroll = throttle((direction: number) => {
+const throttledScroll = throttle(100, (direction: number) => {
   frameState.update((fs) => {
     fs.zoom.level = clamp(fs.zoom.level + direction, -50, 10);
     fs.zoom.value = clamp(
@@ -94,7 +94,7 @@ const throttledScroll = throttle((direction: number) => {
     );
     fs.zoom.hideGrid = fs.zoom.level >= ZOOM_HIDE_GRID;
   });
-}, 100);
+});
 
 export function zoom(direction: number) {
   throttledScroll(direction);

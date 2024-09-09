@@ -33,7 +33,7 @@ import {
 } from "@store/frame";
 import { ToolMode, toolsState } from "@store/tools";
 import { init, isKeyPressed, isMouseInteraction } from "./renderer";
-import { flow } from "lodash";
+import { flow } from "lodash/fp";
 
 export function setup(p: p5) {
   return () => {
@@ -117,7 +117,7 @@ function onLeftMouseReleaseCrop() {
   onCropRelease();
 }
 
-function onCropApply(btn: number) {
+function onCropApply(_btn: number) {
   const { keyboard } = frameState.read();
 
   if (isLeaveState(keyboard.prev[KBD_ENTER], keyboard.curr[KBD_ENTER])) {
@@ -178,14 +178,12 @@ function onMiddleMouseClick() {
   old_origin = getOrigin();
 }
 
-const panningFn = flow([
-  getScaledMouseCoords,
-  (v) => subCoords(ms, v), // calc delta
-  (v) => addCoords(old_origin, v), // add to origin
-  roundCoords, // round to pixels
-  pan, // commit
-]);
-
 function onMiddleMousePress() {
-  panningFn();
+  return flow(
+    () => getScaledMouseCoords(),
+    (v) => subCoords(ms, v), // calc delta
+    (v) => addCoords(old_origin, v), // add to origin
+    (v) => roundCoords(v), // round to pixels
+    (v) => pan(v) // commit
+  )();
 }

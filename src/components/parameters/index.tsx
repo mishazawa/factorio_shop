@@ -1,6 +1,6 @@
 import { Description } from "./Description";
 import { Settings } from "./Settings";
-import { differenceWith, filter, head, reverse } from "lodash";
+import { differenceWith, filter, head, reverse } from "lodash/fp";
 import { getParentsRecursive } from "./utils";
 import { Property, ComplexType, Concept } from "@store/factorio-api.types";
 import { useFactorioApi } from "@store/api";
@@ -24,7 +24,7 @@ export function Parameters({
   current: string;
   options: Concept[];
 }) {
-  const selected = head(filter(options, (n) => n.name === current));
+  const selected = head(filter((n) => n.name === current, options));
 
   if (!selected) {
     return (
@@ -62,9 +62,9 @@ const parametersToSkip = IGNORED_PARAMETERS.map((name) => ({ name }));
 
 export function ParameterInputList({ params = [] }: { params?: Property[] }) {
   const cleanList = differenceWith(
+    (a, b) => a.name === b.name,
     params,
-    parametersToSkip,
-    (a, b) => a.name === b.name
+    parametersToSkip
   );
 
   return (

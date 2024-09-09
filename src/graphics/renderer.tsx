@@ -1,20 +1,15 @@
 import { BBox, Coords } from "@store/common";
-import { assignIn } from "lodash";
+
 import p5 from "p5";
 import { toWorldSpace } from "./utils";
+import { identity } from "lodash/fp";
 
-type Renderer = {
-  processing: p5;
-};
-
-function createRenderer(p: p5): p5 & Renderer {
-  return assignIn(p, { processing: p });
-}
+type Renderer = p5;
 
 export let renderer: p5 & Renderer = null!;
 
 export function init(p: p5) {
-  renderer = createRenderer(p);
+  renderer = identity(p);
 }
 
 export function aabb({ ax, ay, bx, by }: BBox) {

@@ -15,10 +15,11 @@ import {
   isString,
   toInteger,
   toNumber,
-} from "lodash";
+  compose,
+} from "lodash/fp";
 
 function lookupType(t: string) {
-  return find(useFactorioApi.getState().api?.types, ({ name }) => name === t);
+  return find(({ name }) => name === t, useFactorioApi.getState().api?.types);
 }
 
 export function isBuiltin(t: SimpleType | ComplexType) {
@@ -36,9 +37,9 @@ export function decomposeComplexType(t: SimpleType | ComplexType): ComplexType {
   return t;
 }
 
-export function isOptionPicker(options: ComplexType[]) {
-  return every(options, (o) => o.complex_type === "literal");
-}
+export const isOptionPicker = every(
+  (o: ComplexType) => o.complex_type === "literal"
+);
 
 export function isVector(type: SimpleType | ComplexType) {
   return isString(type) && type === "Vector";
@@ -50,7 +51,7 @@ export function isColor(type: SimpleType | ComplexType) {
 
 export function isTuple([first, ...options]: Array<SimpleType | ComplexType>) {
   if (!isString(first)) return false;
-  return every(options as ComplexType[], (ct) => ct.complex_type === "tuple");
+  return every((ct) => ct.complex_type === "tuple", options as ComplexType[]);
 }
 
 export function unionToOptions(options: FLiteral[]): string[] {
@@ -61,7 +62,10 @@ export function getParentsRecursive(
   concepts: Concept[],
   parent: string
 ): Property[][] {
-  const v = head(filter(concepts, (n) => n.name === parent));
+  const v = compose(
+    head,
+    filter((n: Concept) => n.name === parent)
+  )(concepts);
 
   if (!v || !v.properties) return [];
   if (!v.parent) return [v.properties];

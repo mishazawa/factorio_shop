@@ -2,7 +2,7 @@ import { ChangeEvent, useCallback } from "react";
 import { ParameterProps } from ".";
 
 import { ErrorProperty } from "./Error";
-import { isString, nth, toArray } from "lodash";
+import { isString, nth, toArray } from "lodash/fp";
 import {
   decomposeComplexType,
   isColor,
@@ -93,7 +93,7 @@ export function PNumber({
   }
 
   function unpackValue(): number | undefined {
-    return indexed ? nth(val, index) : (val as unknown as number);
+    return indexed ? nth(index, val) : (val as unknown as number);
   }
 
   function onChange(e: ChangeEvent<HTMLInputElement>) {

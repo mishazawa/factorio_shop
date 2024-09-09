@@ -15,7 +15,8 @@ import {
   SelectBoxHandle,
   updateSelectionBBox,
 } from "@store/selection";
-import { values } from "lodash";
+
+import { flow, values } from "lodash/fp";
 import { aabb, getMouse } from "./renderer";
 
 const DEBUG_LINE = 1;
@@ -96,16 +97,19 @@ export function onSelectionPress() {
   if (active === NO_ACTIVE_LAYER) return;
 
   if (selection.translate) {
-    const { xform } = selectionState.read();
-    translateSelection();
-    copyXform(active, xform);
+    const _ = flow(
+      () => translateSelection(),
+      () => selectionState.read(),
+      ({ xform }) => copyXform(active, xform)
+    )();
   }
 
   if (selection.resize && selection.handle) {
-    const { xform } = selectionState.read();
-
-    extendSelection(selection.handle);
-    copyXform(active, xform);
+    const _ = flow(
+      () => extendSelection(selection.handle!),
+      () => selectionState.read(),
+      ({ xform }) => copyXform(active, xform)
+    )();
   }
 }
 
@@ -114,19 +118,22 @@ export function onSelectionRelease() {
   if (active === NO_ACTIVE_LAYER) return;
 
   if (selection.resize) {
-    updateSelectionBBox();
-
-    const { xform, bbox } = selectionState.read();
-
-    applyTransform(active, xform, bbox);
+    const _ = flow(
+      () => updateSelectionBBox(), //
+      () => selectionState.read(),
+      ({ xform, bbox }) => applyTransform(active, xform, bbox)
+    )();
   }
 
   if (selection.translate) {
-    const { xform, bbox } = selectionState.read();
-    translateSelection(true);
-    updateSelectionBBox();
-    applyTransform(active, xform, bbox);
+    const _ = flow(
+      () => translateSelection(true),
+      () => updateSelectionBBox(),
+      () => selectionState.read(),
+      ({ xform, bbox }) => applyTransform(active, xform, bbox)
+    )();
   }
+
   frameState.update((fs) => {
     fs.selection.resize = false;
     fs.selection.handle = null;

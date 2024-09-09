@@ -8,7 +8,7 @@ import {
   xtobb,
 } from "./common";
 import { SpriteObject } from "./layers";
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash/fp";
 
 export type SelectBoxHandle =
   | "T"
