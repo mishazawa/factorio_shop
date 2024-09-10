@@ -4,16 +4,22 @@ import { Coords, Xform } from "@store/common";
 import {
   GRID_COLOR,
   GRID_WIDTH,
+  KBD_ENTER,
   OUTLINE_COLOR,
   OUTLINE_WIDTH,
-  RESPONSIVE_CANVAS,
   TILE_DIMENSIONS,
 } from "@app/constants";
 import { useFactorioApi } from "@store/api";
 import { createLayer, useLayersStore, removeImage } from "@store/layers";
-import { getMouse, renderer as R } from "./renderer";
+import {
+  getMouse,
+  isKeyPressed,
+  isMouseInteraction,
+  renderer as R,
+} from "./renderer";
 import { frameState, getOrigin } from "@store/frame";
-import { flow, round } from "lodash/fp";
+import { cloneDeep, flow, round } from "lodash/fp";
+import { ToolMode, toolsState } from "@store/tools";
 
 type PImage = p5.Image & {
   canvas: HTMLCanvasElement;
@@ -114,27 +120,6 @@ export function sequence(...fns: (() => boolean)[]) {
   }
 }
 
-export function updateCanvasDimensions(p5: p5) {
-  return {
-    canvasWidth: p5.windowWidth,
-    canvasHeight: p5.windowHeight,
-  };
-}
-
-export function onWindowResize(p5: p5) {
-  if (!RESPONSIVE_CANVAS) return () => {};
-  return () => {
-    const { canvasWidth, canvasHeight } = updateCanvasDimensions(p5);
-    const c = p5.createCanvas(canvasWidth, canvasHeight);
-
-    const x = (p5.windowWidth - canvasWidth) / 2;
-    const y = (p5.windowHeight - canvasHeight) / 2;
-    c.position(x, y);
-
-    p5.pixelDensity(window.devicePixelRatio);
-  };
-}
-
 export function loadPImage(file: File) {
   const reader = new FileReader();
   const fileImage = new Image();
@@ -215,4 +200,49 @@ export function toWorldSpace(coords: Coords) {
   const zoomRatio = getZoomRatio();
   const orig = getOrigin();
   return addCoords(scaleCoords(zoomRatio, coords), orig);
+}
+
+export function withMode(mode: ToolMode, callback: (a: void) => void) {
+  if (toolsState.read().mode === mode) callback();
+}
+
+export function withButton(
+  cb: () => void,
+  btn: p5.LEFT | p5.RIGHT | p5.CENTER
+) {
+  if (isMouseInteraction(btn)) cb();
+}
+
+export function DEBUG_CLICK() {
+  // const { x, y } = toWorldSpace(getMouse());
+  // outline(x, y, 10, 10, 3, [55, 66, 77]);
+}
+
+export function isLeaveState(prev: boolean, curr: boolean) {
+  return !curr && curr !== prev;
+}
+
+// export function isEnteredState(prev: boolean, curr: boolean) {
+//   return curr && curr !== prev;
+// }
+
+export function withButtonState(
+  cb: () => void,
+  btn: p5.LEFT | p5.RIGHT | p5.CENTER
+) {
+  const { mouse } = frameState.read();
+  if (mouse.curr[btn]) cb();
+}
+
+export function updateContols(p: p5) {
+  frameState.update((fs) => {
+    fs.keyboard.curr[KBD_ENTER] = isKeyPressed(p.ENTER);
+  });
+}
+
+export function swapContols() {
+  frameState.update((fs) => {
+    fs.mouse.prev = cloneDeep(fs.mouse.curr);
+    fs.keyboard.prev = cloneDeep(fs.keyboard.curr);
+  });
 }

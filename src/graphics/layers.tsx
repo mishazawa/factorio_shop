@@ -1,11 +1,10 @@
 import { DEBUG, NO_ACTIVE_LAYER } from "@app/constants";
 import { frameState, resetFrame } from "@store/frame";
 import { layersState, useLayersStore } from "@store/layers";
-
-import { image, outline } from "./utils";
-
 import { createSelection } from "@store/selection";
+import { image, outline } from "./utils";
 import { aabb } from "./renderer";
+
 export function drawLayers() {
   const store = layersState.read();
   const layers = useLayersStore.getState().layers;

@@ -85,7 +85,7 @@ export function resetFrame() {
 
 export const frameState = createReactlessStore<FrameState>(resetFrame());
 
-const throttledScroll = throttle(100, (direction: number) => {
+const throttledScroll = throttle(16, (direction: number) => {
   frameState.update((fs) => {
     fs.zoom.level = clamp(fs.zoom.level + direction, -50, 10);
     fs.zoom.value = clamp(
@@ -103,13 +103,6 @@ export function pan(delta: Coords) {
   if (!delta.x && delta.y) return;
   frameState.update((fs) => {
     fs.pan = cloneDeep(delta);
-  });
-}
-
-export function expireFrameContols() {
-  frameState.update((fs) => {
-    fs.mouse.prev = cloneDeep(fs.mouse.curr);
-    fs.keyboard.prev = cloneDeep(fs.keyboard.curr);
   });
 }
 
