@@ -1,5 +1,5 @@
 import { getOrigin, pan, zoom } from "@store/frame";
-import { flow, identity } from "lodash/fp";
+import { flow, identity, partial } from "lodash/fp";
 import {
   getScaledMouseCoords,
   subCoords,
@@ -22,12 +22,12 @@ function release() {}
 
 function move() {
   return flow(
-    (_) => getScaledMouseCoords(),
-    (v) => subCoords(state.mouse, v), // calc delta
-    (v) => addCoords(state.origin, v), // add to origin
-    (v) => roundCoords(v), // round to pixels
-    (v) => pan(v) // commit
-  )(null); // for the sake of text alignment
+    getScaledMouseCoords,
+    partial(subCoords, [state.mouse]), // calc delta
+    partial(addCoords, [state.origin]), // add to origin
+    roundCoords, // round to pixels
+    pan // commit
+  )(); // for the sake of text alignment
 }
 
 export default comply({

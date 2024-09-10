@@ -16,7 +16,7 @@ import {
   updateSelectionBBox,
 } from "@store/selection";
 
-import { flow, values } from "lodash/fp";
+import { flow, partial, values } from "lodash/fp";
 import { aabb, getMouse } from "./renderer";
 
 const DEBUG_LINE = 1;
@@ -98,18 +98,18 @@ export function onSelectionPress() {
 
   if (selection.translate) {
     const _ = flow(
-      () => translateSelection(),
-      () => selectionState.read(),
-      ({ xform }) => copyXform(active, xform)
-    )();
+      translateSelection,
+      () => selectionState.read().xform,
+      partial(copyXform, [active])
+    )(false);
   }
 
   if (selection.resize && selection.handle) {
     const _ = flow(
-      () => extendSelection(selection.handle!),
-      () => selectionState.read(),
-      ({ xform }) => copyXform(active, xform)
-    )();
+      extendSelection,
+      () => selectionState.read().xform,
+      partial(copyXform, [active])
+    )(selection.handle!);
   }
 }
 
@@ -119,7 +119,7 @@ export function onSelectionRelease() {
 
   if (selection.resize) {
     const _ = flow(
-      () => updateSelectionBBox(), //
+      updateSelectionBBox, //
       () => selectionState.read(),
       ({ xform, bbox }) => applyTransform(active, xform, bbox)
     )();
@@ -127,11 +127,11 @@ export function onSelectionRelease() {
 
   if (selection.translate) {
     const _ = flow(
-      () => translateSelection(true),
-      () => updateSelectionBBox(),
+      translateSelection,
+      updateSelectionBBox,
       () => selectionState.read(),
       ({ xform, bbox }) => applyTransform(active, xform, bbox)
-    )();
+    )(true);
   }
 
   frameState.update((fs) => {
@@ -183,11 +183,9 @@ function extendSelection(manipulator: SelectBoxHandle) {
 
 function DEBUG_selection() {
   if (!DEBUG) return;
-  values(selectionState.read().collisions)
-    // .slice(1, 2)
-    .map(({ ax, ay, bx, by }) =>
-      outline(...([ax, ay, bx - ax, by - ay] as Vec4), DEBUG_LINE, DEBUG_GREEN)
-    );
+  values(selectionState.read().collisions).map(({ ax, ay, bx, by }) =>
+    outline(...([ax, ay, bx - ax, by - ay] as Vec4), DEBUG_LINE, DEBUG_GREEN)
+  );
 }
 
 function getManipulatorIntersection(
