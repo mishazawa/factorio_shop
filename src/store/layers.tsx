@@ -17,30 +17,50 @@ export type SpriteObject = {
   crop: Xform;
 };
 
+export type RegionType = "selection" | "scale";
+
+export const REGION_TYPES: [RegionType, RegionType] = ["selection", "scale"];
+
+export type RegionObject = {
+  id: string;
+  type: RegionType;
+  xform: Xform;
+  bind: never;
+  color: [number, number, number];
+};
+
 type LayersStore = {
   images: Sprite[];
   sprites: SpriteObject[];
+  regions: RegionObject[];
 };
 
 type LayersReactiveStoreData = {
   layers: number[];
+  regions: Record<string, string>;
+  currentEditableRegionId: string | null;
 };
 
 type LayersReactiveStoreFunc = {
   add: (value: number) => void;
   reorder: (value: number[]) => void;
   remove: (value: number) => void;
+  bindRegion: (layer: string, region: string) => void;
+  setRegionId: (id: string | null) => void;
 };
 
 export const layersState = createReactlessStore<LayersStore>({
   images: [],
   sprites: [],
+  regions: [],
 });
 
 export const useLayersStore = create<
   LayersReactiveStoreData & LayersReactiveStoreFunc
 >((set) => ({
   layers: [],
+  regions: {},
+  currentEditableRegionId: null,
   add(value: number) {
     return set(
       produce((draft) => {
@@ -63,6 +83,20 @@ export const useLayersStore = create<
     return set(
       produce((draft) => {
         draft.layers = value;
+      })
+    );
+  },
+  bindRegion(layer: string, region: string) {
+    return set(
+      produce((draft) => {
+        draft.regions[region] = layer;
+      })
+    );
+  },
+  setRegionId(id: string | null) {
+    return set(
+      produce((draft) => {
+        draft.currentEditableRegionId = id;
       })
     );
   },
@@ -138,5 +172,29 @@ function createBlankSprite(
       position: { x: 0, y: 0 },
       size: { x: dom.width, y: dom.height }, // maybe change this later
     }),
+  };
+}
+
+export function createRegion(layer: string) {
+  const region = createBlankRegion();
+
+  layersState.update((ls) => {
+    ls.regions.push(region);
+  });
+
+  const { bindRegion } = useLayersStore.getState();
+  bindRegion(layer, region.id);
+}
+
+function createBlankRegion(t: RegionType = "selection"): RegionObject {
+  return {
+    id: uniqueId("region-"),
+    type: t,
+    xform: {
+      position: { x: 0, y: 0 },
+      size: { x: 1, y: 1 },
+    },
+    bind: null!,
+    color: [255, 0, 0],
   };
 }

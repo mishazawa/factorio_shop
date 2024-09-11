@@ -4,6 +4,7 @@ import { setMode, useToolsStore } from "@store/tools";
 import MOVE_TOOL_ICON from "@assets/icons/translate.svg";
 import CROP_TOOL_ICON from "@assets/icons/crop.svg";
 import { LayerList } from "./LayerList";
+import { Region } from "./parameters/Region";
 
 export function Tools() {
   const activeMode = useToolsStore((s) => s.mode);
@@ -24,6 +25,12 @@ export function Tools() {
             onClick={() => setMode("CROP")}
             className={`${activeMode === "CROP" ? "activeTool" : ""}`}
           />
+        </div>
+        <div className="Region-params-wrapper d-flex col align-start">
+          <h1>Region properties</h1>
+          <div className="parameters d-flex bordered-dark-concave align-start">
+            <Region />
+          </div>
         </div>
         <div className="Layers-wrapper">
           <h1>Layers</h1>

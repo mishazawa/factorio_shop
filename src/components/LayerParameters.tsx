@@ -1,7 +1,7 @@
 import { useFactorioApi } from "@store/api";
 import { openLayerPanel, useToolsStore } from "@store/tools";
 
-import EYE_SLASH from "@assets/icons/eye-slash.svg";
+import HIDE_ICON from "@assets/icons/chevron-r.svg";
 
 import { IconButton } from "./Buttons";
 import { Parameters } from "./parameters";
@@ -28,7 +28,7 @@ export function LayerParameters() {
             <div className="d-flex between">
               <h1>Layer properties</h1>
               <IconButton
-                icon={EYE_SLASH}
+                icon={HIDE_ICON}
                 tooltip="close"
                 className="Danger-button"
                 onClick={() => openLayerPanel(false)}

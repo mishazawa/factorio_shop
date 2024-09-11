@@ -2,13 +2,21 @@ import { Reorder, useDragControls, useMotionValue } from "framer-motion";
 
 import GRIP_ICON from "@assets/icons/grip.svg";
 import TRASH_ICON from "@assets/icons/trash-can.svg";
-import PEN_ICON from "@assets/icons/pen.svg";
-import { useLayersStore, layersState } from "@store/layers";
+import TABLE_ICON from "@assets/icons/table-list.svg";
+import LAYER_ADD_ICON from "@assets/icons/layer-add.svg";
+
+import {
+  useLayersStore,
+  layersState,
+  createRegion,
+  RegionObject,
+} from "@store/layers";
 
 import { IconButton } from "./Buttons";
 import { openLayerPanel } from "@store/tools";
 import { useFactorioApi } from "@store/api";
 import { unloadPImage } from "@app/graphics/utils";
+import { flow, intersectionWith, keys, pickBy, values } from "lodash/fp";
 
 export function LayerList() {
   const layers = useLayersStore((s) => s.layers);
@@ -29,6 +37,15 @@ function LayerItem({ item }: { item: number }) {
   const y = useMotionValue(0);
   const dragControls = useDragControls();
   const meta = layersState.read().sprites[item];
+  const regs = layersState.read().regions;
+
+  const regions = useLayersStore((s) =>
+    flow(
+      pickBy((value) => value === meta.id),
+      keys,
+      intersectionWith((a, b) => a.id === b, values(regs))
+    )(s.regions)
+  );
 
   function openLayerProps() {
     openLayerPanel(true);
@@ -48,7 +65,12 @@ function LayerItem({ item }: { item: number }) {
         <div>{meta?.filename}</div>
         <div className="tools">
           <IconButton
-            icon={PEN_ICON}
+            icon={LAYER_ADD_ICON}
+            tooltip="add region"
+            onClick={() => createRegion(meta.id)}
+          />
+          <IconButton
+            icon={TABLE_ICON}
             tooltip="properties"
             onClick={openLayerProps}
           />
@@ -66,6 +88,30 @@ function LayerItem({ item }: { item: number }) {
           </div>
         </div>
       </div>
+      <div className="region-list">
+        {regions.map((v) => (
+          <RegionItem key={v.id} region={v} layer={meta.id} />
+        ))}
+      </div>
     </Reorder.Item>
+  );
+}
+
+function RegionItem({ region }: { region: RegionObject; layer: string }) {
+  const activate = useLayersStore((s) => s.setRegionId);
+  return (
+    <div
+      onClick={() => activate(region.id)}
+      className="region-item bordered-dark-concave d-flex flex-row between gap-01 tr-fast"
+    >
+      <div>{region.id}</div>
+      <div className="tools d-flex flex-row gap-01">
+        <IconButton
+          icon={TRASH_ICON}
+          tooltip="remove"
+          className="Danger-button"
+        />
+      </div>
+    </div>
   );
 }

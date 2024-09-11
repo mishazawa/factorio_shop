@@ -8,10 +8,12 @@ export function Dropdown<T extends string>({
   current,
   options,
   onClick,
+  className = "",
 }: {
   current: T;
   options: T[];
   onClick: (v: T) => void;
+  className?: string;
 }) {
   const [isOpen, setOpen] = useState<boolean>(false);
 
@@ -22,9 +24,11 @@ export function Dropdown<T extends string>({
   return (
     <div className="dropdown">
       <div className="drop-button" onClick={() => setOpen(!isOpen)}>
-        <span className="title bordered-dark-concave">{current}</span>
+        <span className={`title bordered-dark-concave ${className}`}>
+          {current}
+        </span>
         <IconButton
-          className={`btn ${isOpen ? "openDropDown" : ""}`}
+          className={`btn ${isOpen ? "openDropDown" : ""} ${className}`}
           icon={GRAPH_ICON}
           tooltip="select type"
         />
