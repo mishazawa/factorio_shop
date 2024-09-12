@@ -10,6 +10,7 @@ import {
   layersState,
   createRegion,
   RegionObject,
+  activateRegion,
 } from "@store/layers";
 
 import { IconButton } from "./Buttons";
@@ -98,10 +99,9 @@ function LayerItem({ item }: { item: number }) {
 }
 
 function RegionItem({ region }: { region: RegionObject; layer: string }) {
-  const activate = useLayersStore((s) => s.setRegionId);
   return (
     <div
-      onClick={() => activate(region.id)}
+      onClick={() => activateRegion(region.id)}
       className="region-item bordered-dark-concave d-flex flex-row between gap-01 tr-fast"
     >
       <div>{region.id}</div>

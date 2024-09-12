@@ -13,7 +13,13 @@ import {
 import { cropImage, drawSelection } from "./selection";
 
 import { drawLayers, onLayerHover } from "./layers";
-import { TRANSFORM, BACKGROUND_COLOR, CROP, KBD_ENTER } from "@app/constants";
+import {
+  TRANSFORM,
+  BACKGROUND_COLOR,
+  CROP,
+  KBD_ENTER,
+  REGION_TRANSFORM,
+} from "@app/constants";
 
 import { frameState } from "@store/frame";
 import { onMouseMove } from "./mouse";
@@ -27,6 +33,10 @@ export function draw(p: p5) {
 
     withMode(TRANSFORM, () => {
       onLayerHover();
+      drawSelection();
+    });
+
+    withMode(REGION_TRANSFORM, () => {
       drawSelection();
     });
 

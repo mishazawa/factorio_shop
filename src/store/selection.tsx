@@ -7,7 +7,7 @@ import {
   Xform,
   xtobb,
 } from "./common";
-import { SpriteObject } from "./layers";
+import { RegionObject, SpriteObject } from "./layers";
 import { cloneDeep } from "lodash/fp";
 
 export type SelectBoxHandle =
@@ -35,9 +35,11 @@ export const selectionState = createReactlessStore<SelectionStore>({
   collisions: collisionLUT(emptyBBox()),
 });
 
-export function createSelection(sprite: SpriteObject): SelectionStore {
+export function createSelection(
+  obj: SpriteObject | RegionObject
+): SelectionStore {
   return selectionState.update((draft) => {
-    draft.xform = cloneDeep(sprite.xform);
+    draft.xform = cloneDeep(obj.xform);
     draft.bbox = xtobb(draft.xform);
 
     draft.collisions = collisionLUT(draft.bbox);

@@ -1,11 +1,12 @@
 import { partial } from "lodash/fp";
 import { comply } from ".";
 import { onCropPress, onCropRelease, onSelectionClick } from "../selection";
-import { CROP } from "@app/constants";
+import { REGION_TRANSFORM } from "@app/constants";
 import { sequence, withMode } from "../utils";
 import { onLayerClick } from "../layers";
 
-const mode = partial(withMode, [CROP]);
+// todo rename file
+const mode = partial(withMode, [REGION_TRANSFORM]);
 
 // copypaste from transform
 function click() {
@@ -15,6 +16,7 @@ function click() {
 function move() {
   onCropPress();
 }
+
 function release() {
   onCropRelease();
 }

@@ -9,7 +9,7 @@ import {
 import { NO_ACTIVE_LAYER, DEBUG } from "@app/constants";
 import { BBox, Vec4, Xform } from "@store/common";
 import { frameState } from "@store/frame";
-import { applyTransform, copyXform } from "@store/layers";
+import { applyTransform, copyXform, updateRegionXform } from "@store/layers";
 import {
   selectionState,
   SelectBoxHandle,
@@ -79,11 +79,15 @@ export function onCropPress() {
 }
 
 export function onCropRelease() {
-  const { selection, active } = frameState.read();
+  const { selection, active, region } = frameState.read();
   if (active === NO_ACTIVE_LAYER) return;
 
   if (selection.resize || selection.translate) {
-    updateSelectionBBox();
+    const _ = flow(
+      updateSelectionBBox,
+      () => selectionState.read().xform,
+      partial(updateRegionXform, [region])
+    )();
   }
 
   frameState.update((fs) => {

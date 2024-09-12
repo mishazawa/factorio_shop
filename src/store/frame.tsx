@@ -22,6 +22,7 @@ type KeyboardState = {
 export type FrameState = {
   hover: number;
   active: number;
+  region: number; // id btw
   selection: {
     resize: boolean;
     translate: boolean;
@@ -48,6 +49,7 @@ export function resetFrame() {
   return {
     hover: NO_ACTIVE_LAYER,
     active: NO_ACTIVE_LAYER,
+    region: NO_ACTIVE_LAYER,
     selection: {
       resize: false,
       handle: null,

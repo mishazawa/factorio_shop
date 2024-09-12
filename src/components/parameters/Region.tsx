@@ -4,7 +4,7 @@ import {
   RegionType,
   useLayersStore,
 } from "@store/layers";
-import { find, findIndex } from "lodash/fp";
+import { find, findIndex, floor } from "lodash/fp";
 import { Dropdown } from "./Dropdown";
 import { Xform } from "@store/common";
 import { IconButton } from "../Buttons";
@@ -23,7 +23,7 @@ export function Region() {
     layersState.update((ls) => {
       const idx = findIndex(({ id }) => id === region.id, ls.regions);
       ls.regions[idx].type = v;
-      // crutch to update UI from non-reactive update
+      // crutch to update UI from non-reactive store
       useLayersStore.getState().setRegionId(null);
       useLayersStore.getState().setRegionId(region.id);
     });
@@ -55,8 +55,8 @@ function XformParameter({ data }: { data: Xform }) {
   return (
     <div className="xform-table-wrapper w-100">
       <span className="text-end">position:</span>
-      <span>x={data.position.x}</span>
-      <span>y={data.position.y}</span>
+      <span>x={floor(data.position.x)}</span>
+      <span>y={floor(data.position.y)}</span>
       <span className="d-flex justify-center">
         <IconButton
           icon={LINK_ICON}
@@ -66,8 +66,8 @@ function XformParameter({ data }: { data: Xform }) {
       </span>
 
       <span className="text-end">size:</span>
-      <span>w={data.size.x}</span>
-      <span>h={data.size.y}</span>
+      <span>w={floor(data.size.x)}</span>
+      <span>h={floor(data.size.y)}</span>
       <span className="d-flex justify-center">
         <IconButton
           icon={LINK_ICON}

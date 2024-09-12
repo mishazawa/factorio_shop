@@ -3,8 +3,12 @@ import { create } from "zustand";
 import { BBox, Sprite, Xform, xtobb } from "./common";
 import { createReactlessStore } from ".";
 
-import { clamp, cloneDeep, has, last, uniqueId } from "lodash/fp";
+import { clamp, cloneDeep, findIndex, has, last, uniqueId } from "lodash/fp";
 import { LayerId } from "./api";
+import { createSelection } from "./selection";
+import { REGION_TRANSFORM, TILE_DIMENSIONS } from "@app/constants";
+import { setMode } from "./tools";
+import { frameState } from "./frame";
 
 export type SpriteObject = {
   id: string;
@@ -45,7 +49,7 @@ type LayersReactiveStoreFunc = {
   add: (value: number) => void;
   reorder: (value: number[]) => void;
   remove: (value: number) => void;
-  bindRegion: (layer: string, region: string) => void;
+  attachRegion: (layer: string, region: string) => void;
   setRegionId: (id: string | null) => void;
 };
 
@@ -86,7 +90,7 @@ export const useLayersStore = create<
       })
     );
   },
-  bindRegion(layer: string, region: string) {
+  attachRegion(layer: string, region: string) {
     return set(
       produce((draft) => {
         draft.regions[region] = layer;
@@ -182,8 +186,8 @@ export function createRegion(layer: string) {
     ls.regions.push(region);
   });
 
-  const { bindRegion } = useLayersStore.getState();
-  bindRegion(layer, region.id);
+  const { attachRegion } = useLayersStore.getState();
+  attachRegion(layer, region.id);
 }
 
 function createBlankRegion(t: RegionType = "selection"): RegionObject {
@@ -192,9 +196,50 @@ function createBlankRegion(t: RegionType = "selection"): RegionObject {
     type: t,
     xform: {
       position: { x: 0, y: 0 },
-      size: { x: 1, y: 1 },
+      size: { x: TILE_DIMENSIONS, y: TILE_DIMENSIONS },
     },
     bind: null!,
     color: [255, 0, 0],
   };
+}
+
+// todo rewrite this mess
+// 1. set region id for UI or reset
+// 2. find xform for selected region
+// 3. create selection object
+// 4. set REGION_TRANSFORM mode
+// 5. activate layer for drawing selection (maybe rewrite this also)
+export function activateRegion(id: string | null) {
+  setRegionId(id);
+  if (!id) return;
+
+  const regionIdx = findIndex(
+    (reg) => reg.id === id,
+    layersState.read().regions
+  );
+
+  createSelection(layersState.read().regions[regionIdx]!);
+
+  setMode(REGION_TRANSFORM);
+
+  const layerId = useLayersStore.getState().regions[id];
+
+  frameState.update((fs) => {
+    fs.region = regionIdx;
+    fs.active = findIndex((l) => l.id === layerId, layersState.read().sprites);
+  });
+}
+
+export function setRegionId(id: string | null) {
+  useLayersStore.getState().setRegionId(id);
+}
+
+export function updateRegionXform(idx: number, xform: Xform) {
+  layersState.update((draft) => {
+    if (has(["regions", idx], draft)) {
+      draft.regions[idx].xform = cloneDeep(xform);
+      setRegionId(null);
+      setRegionId(draft.regions[idx].id);
+    }
+  });
 }

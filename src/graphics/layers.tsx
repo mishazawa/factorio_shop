@@ -1,6 +1,6 @@
 import { DEBUG, NO_ACTIVE_LAYER } from "@app/constants";
 import { frameState, resetFrame } from "@store/frame";
-import { layersState, useLayersStore } from "@store/layers";
+import { layersState, setRegionId, useLayersStore } from "@store/layers";
 import { createSelection } from "@store/selection";
 import { image, outline } from "./utils";
 import { aabb } from "./renderer";
@@ -67,6 +67,7 @@ export function onLayerClick() {
     fs.active = fs.hover === NO_ACTIVE_LAYER ? NO_ACTIVE_LAYER : fs.hover;
     if (fs.active === NO_ACTIVE_LAYER) {
       resetFrame();
+      setRegionId(null);
       return fs;
     }
     createSelection(layersState.read().sprites[fs.active]);

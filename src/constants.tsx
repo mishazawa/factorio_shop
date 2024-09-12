@@ -11,6 +11,7 @@ export const COLLISION_WIDTH_HALF = 10;
 export const NO_ACTIVE_LAYER = -1;
 export const TRANSFORM = "TRANSFORM";
 export const CROP = "CROP";
+export const REGION_TRANSFORM = "REGION_TRANSFORM";
 export const KBD_ENTER = 13;
 export const ZOOM_MIN_MAX_ABS: [number, number] = [0.1, 10]; // scaled values
 export const ZOOM_DIRECTION = -1;

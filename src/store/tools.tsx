@@ -11,7 +11,7 @@ type ToolsStoreFunc = {
   setMode: (m: ToolMode) => void;
 };
 
-export type ToolMode = "TRANSFORM" | "CROP" | "NONE";
+export type ToolMode = "TRANSFORM" | "CROP" | "REGION_TRANSFORM" | "NONE";
 
 export const toolsState = createReactlessStore<Pick<ToolsStore, "mode">>({
   mode: "NONE",
