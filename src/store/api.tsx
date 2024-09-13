@@ -3,10 +3,11 @@ import {
   NO_ACTIVE_LAYER,
   WHITELIST_TYPES,
 } from "@app/constants";
-import { filter, includes } from "lodash/fp";
+import { filter, includes, set } from "lodash/fp";
 import { create } from "zustand";
 import { Prototype, Concept, AttributeValue } from "./factorio-api.types";
-import { produce } from "immer";
+import { produce, WritableDraft } from "immer";
+import { InternalSetFunction } from "./common";
 
 type FactorioApi = {
   application: "factorio";
@@ -38,22 +39,24 @@ type FactorioApiStoreFunc = {
   removeLayer: (id: LayerId) => void;
 };
 
-export const useFactorioApi = create<FactorioApiStore & FactorioApiStoreFunc>(
-  (set) => ({
-    api: null,
-    editorTypes: [],
-    loaded: false,
-    activeLayerId: NO_ACTIVE_LAYER,
-    layers: {},
-    createLayer: (id: string) => set(initLayerProperties(id)),
-    removeLayer: (id: LayerId) => set(remove(id)),
-    setActiveLayer: (activeLayerId: string) => set({ activeLayerId }),
-    setLayerType: (v: string) => set(setLayerType(v)),
-    setLayerAttribute: (name: string, value: AttributeValue) => {
-      set(setLayerAttribute(name, value));
-    },
-  })
-);
+export const useFactorioApi = create<
+  FactorioApiStore &
+    FactorioApiStoreFunc &
+    InternalSetFunction<FactorioApiStore>
+>((set) => ({
+  api: null,
+  editorTypes: [],
+  loaded: false,
+  activeLayerId: NO_ACTIVE_LAYER,
+  layers: {},
+  createLayer: (id: string) => set(initLayerProperties(id)),
+  removeLayer: (id: LayerId) => set(remove(id)),
+  setActiveLayer: (activeLayerId: string) => set({ activeLayerId }),
+  setLayerType: (v: string) => set(setLayerType(v)),
+  setLayerAttribute: (name: string, value: AttributeValue) =>
+    set(setLayerAttribute(name, value)),
+  _SET: (fn: (d: WritableDraft<FactorioApiStore>) => void) => set(produce(fn)),
+}));
 
 export function initFactorioApi(resp: FactorioApi) {
   useFactorioApi.setState({
@@ -91,5 +94,11 @@ function setLayerType(value: string) {
 function setLayerAttribute(name: string, value: AttributeValue) {
   return produce((s: FactorioApiStore) => {
     s.layers[s.activeLayerId].attributes[name] = value;
+  });
+}
+
+export function setLayerAttributeByPath(path: string, value: AttributeValue) {
+  useFactorioApi.getState()._SET((draft) => {
+    draft.layers = set(path, value, draft.layers);
   });
 }

@@ -2,6 +2,7 @@ import {
   layersState,
   REGION_TYPES,
   RegionType,
+  startLink,
   useLayersStore,
 } from "@store/layers";
 import { find, findIndex, floor } from "lodash/fp";
@@ -46,35 +47,42 @@ export function Region() {
           />
         </span>
       </div>
-      <XformParameter data={region.xform} />
+      <XformParameter data={region.xform} id={region.id} />
     </div>
   );
 }
 
-function XformParameter({ data }: { data: Xform }) {
+function XformParameter({ data, id }: { data: Xform; id: string }) {
   return (
     <div className="xform-table-wrapper w-100">
       <span className="text-end">position:</span>
       <span>x={floor(data.position.x)}</span>
       <span>y={floor(data.position.y)}</span>
       <span className="d-flex justify-center">
-        <IconButton
-          icon={LINK_ICON}
-          tooltip="link"
-          className="Icon-button-small"
-        />
+        <RegionControls id={id} parameter="position" />
       </span>
-
       <span className="text-end">size:</span>
       <span>w={floor(data.size.x)}</span>
       <span>h={floor(data.size.y)}</span>
       <span className="d-flex justify-center">
-        <IconButton
-          icon={LINK_ICON}
-          tooltip="link"
-          className="Icon-button-small"
-        />
+        <RegionControls id={id} parameter="size" />
       </span>
     </div>
+  );
+}
+
+function RegionControls({ id, parameter }: { id: string; parameter: string }) {
+  function linkParameter() {
+    startLink(id, parameter);
+  }
+  return (
+    <>
+      <IconButton
+        onClick={linkParameter}
+        icon={LINK_ICON}
+        tooltip="link"
+        className="Icon-button-small"
+      />
+    </>
   );
 }

@@ -1,14 +1,25 @@
-import { produce } from "immer";
+import { produce, WritableDraft } from "immer";
 import { create } from "zustand";
 import { BBox, Sprite, Xform, xtobb } from "./common";
 import { createReactlessStore } from ".";
+// todo rewrite this mess!!!!!
 
-import { clamp, cloneDeep, findIndex, has, last, uniqueId } from "lodash/fp";
-import { LayerId } from "./api";
+import {
+  clamp,
+  cloneDeep,
+  findIndex,
+  has,
+  join,
+  last,
+  uniqueId,
+} from "lodash/fp";
+import { LayerId, useFactorioApi } from "./api";
 import { createSelection } from "./selection";
 import { REGION_TRANSFORM, TILE_DIMENSIONS } from "@app/constants";
-import { setMode } from "./tools";
+import { openLayerPanel, setMode } from "./tools";
 import { frameState } from "./frame";
+import { Property } from "./factorio-api.types";
+import { createLink } from "./link-tracker";
 
 export type SpriteObject = {
   id: string;
@@ -25,11 +36,18 @@ export type RegionType = "selection" | "scale";
 
 export const REGION_TYPES: [RegionType, RegionType] = ["selection", "scale"];
 
+type LinkType = "tuple";
+
+type ReferenceLinkObject = {
+  type: LinkType;
+  path: string | null;
+};
+
 export type RegionObject = {
   id: string;
   type: RegionType;
   xform: Xform;
-  bind: never;
+  bind: ReferenceLinkObject;
   color: [number, number, number];
 };
 
@@ -39,10 +57,18 @@ type LayersStore = {
   regions: RegionObject[];
 };
 
+type ReferenceLinkState = {
+  stage: "NONE" | "LOOKING_FOR_PARAMETER" | "ERROR";
+  id: string | null;
+  parameter: string | null;
+};
+
 type LayersReactiveStoreData = {
   layers: number[];
   regions: Record<string, string>;
   currentEditableRegionId: string | null;
+  lastUpdate: number;
+  referenceLinkState: ReferenceLinkState;
 };
 
 type LayersReactiveStoreFunc = {
@@ -51,6 +77,7 @@ type LayersReactiveStoreFunc = {
   remove: (value: number) => void;
   attachRegion: (layer: string, region: string) => void;
   setRegionId: (id: string | null) => void;
+  _SET: (cb: (draft: WritableDraft<LayersReactiveStoreData>) => void) => void;
 };
 
 export const layersState = createReactlessStore<LayersStore>({
@@ -65,6 +92,10 @@ export const useLayersStore = create<
   layers: [],
   regions: {},
   currentEditableRegionId: null,
+  lastUpdate: -1,
+  referenceLinkState: resetReferenceLinkState(),
+  _SET: (cb: (draft: WritableDraft<LayersReactiveStoreData>) => void) =>
+    set(produce(cb)),
   add(value: number) {
     return set(
       produce((draft) => {
@@ -101,6 +132,7 @@ export const useLayersStore = create<
     return set(
       produce((draft) => {
         draft.currentEditableRegionId = id;
+        draft.lastUpdate = Math.random();
       })
     );
   },
@@ -198,7 +230,10 @@ function createBlankRegion(t: RegionType = "selection"): RegionObject {
       position: { x: 0, y: 0 },
       size: { x: TILE_DIMENSIONS, y: TILE_DIMENSIONS },
     },
-    bind: null!,
+    bind: {
+      type: "tuple",
+      path: null,
+    },
     color: [255, 0, 0],
   };
 }
@@ -242,4 +277,55 @@ export function updateRegionXform(idx: number, xform: Xform) {
       setRegionId(draft.regions[idx].id);
     }
   });
+}
+
+export function startLink(id: string, parameter: string) {
+  const layerId = useLayersStore.getState().regions[id];
+  useFactorioApi.getState().setActiveLayer(layerId);
+  openLayerPanel(true);
+
+  useLayersStore.getState()._SET((draft) => {
+    draft.referenceLinkState.stage = "LOOKING_FOR_PARAMETER";
+    draft.referenceLinkState.id = id;
+    draft.referenceLinkState.parameter = parameter;
+  });
+}
+export function finishLink(property: Property) {
+  useLayersStore.getState()._SET((draft) => {
+    if (draft.referenceLinkState.stage !== "LOOKING_FOR_PARAMETER") {
+      return;
+    }
+
+    const regIdx = findIndex(
+      ({ id }) => draft.referenceLinkState.id === id,
+      layersState.read().regions
+    );
+
+    if (regIdx < 0) {
+      draft.referenceLinkState = resetReferenceLinkState();
+      return;
+    }
+
+    const layerId = useFactorioApi.getState().activeLayerId;
+
+    createLink(
+      join(".", [
+        "regions",
+        regIdx,
+        "xform",
+        draft.referenceLinkState.parameter,
+      ]),
+      join(".", [layerId, "attributes", property.name])
+    );
+
+    draft.referenceLinkState = resetReferenceLinkState();
+  });
+}
+
+function resetReferenceLinkState(): ReferenceLinkState {
+  return {
+    stage: "NONE",
+    id: null,
+    parameter: null,
+  };
 }

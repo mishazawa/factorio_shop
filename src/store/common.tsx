@@ -1,4 +1,5 @@
 import { COLLISION_WIDTH_HALF } from "@app/constants";
+import { WritableDraft } from "immer";
 import p5 from "p5";
 
 export type Coords = { x: number; y: number };
@@ -54,3 +55,7 @@ export function generateCollider(bbox: Vec4, mask: Vec4): BBox {
     by: bbox[3] + COLLISION_WIDTH_HALF * mask[3],
   };
 }
+
+export type InternalSetFunction<T> = {
+  _SET: (cb: (draft: WritableDraft<T>) => void) => void;
+};

@@ -6,6 +6,7 @@ import { Property, ComplexType, Concept } from "@store/factorio-api.types";
 import { useFactorioApi } from "@store/api";
 import { If } from "../UIKit";
 import { DEBUG, IGNORED_PARAMETERS } from "@app/constants";
+import { Linker } from "./Linker";
 
 export type ParameterProps = {
   property: Property;
@@ -41,6 +42,7 @@ export function Parameters({
       <If v={DEBUG}>
         <DebugStore />
       </If>
+      <Linker />
       {parents.map((p, i) => (
         <ParameterInputList key={i} params={p} />
       ))}
